@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Navigate } from "react-router-dom";
+import { AlertCircle } from "lucide-react";
 import { getItem } from "../api/services";
 import { useAuth } from "../context/AuthContext";
 import ItemForm from "../components/ItemForm";
@@ -30,16 +31,20 @@ export default function EditItem() {
   if (loading) {
     return (
       <div className="container main-content" style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "50vh" }}>
-        <div className="spinner spinner-dark" style={{ width: "2rem", height: "2rem" }} />
+        <div className="spinner spinner-dark" style={{ width: "2.5rem", height: "2.5rem" }} />
       </div>
     );
   }
 
   if (error || !item) {
     return (
-      <div className="container main-content" style={{ textAlign: "center", padding: "3rem 1rem" }}>
-        <div className="alert alert-error" style={{ maxWidth: "480px", margin: "0 auto 1.5rem" }}>{error || "Item not found"}</div>
-        <button onClick={() => navigate("/")} className="btn btn-primary">Go to Home Feed</button>
+      <div className="container main-content" style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "40vh" }}>
+        <div className="error-card card" style={{ maxWidth: "480px", padding: "2rem", textAlign: "center" }}>
+          <AlertCircle size={40} style={{ color: "var(--danger)", marginBottom: "1rem" }} />
+          <h3 style={{ marginBottom: "0.5rem" }}>Failed to load item</h3>
+          <p style={{ color: "var(--text-secondary)", marginBottom: "1.5rem" }}>{error || "Item not found or has been deleted."}</p>
+          <button onClick={() => navigate("/")} className="btn btn-primary">Go to Home Feed</button>
+        </div>
       </div>
     );
   }

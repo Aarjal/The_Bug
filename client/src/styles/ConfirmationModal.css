@@ -1,0 +1,116 @@
+/* --- Confirmation Modal (scoped to avoid conflicts with claim modal) --- */
+.confirm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(26, 32, 44, 0.45);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1100;
+  animation: confirmFadeIn 0.2s ease-out;
+}
+
+.confirm-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  width: 90%;
+  max-width: 420px;
+  overflow: hidden;
+  animation: confirmSlideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.confirm-header {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.confirm-title-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.confirm-title-wrapper h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0;
+}
+
+.confirm-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.confirm-icon.icon-danger {
+  color: var(--danger);
+}
+
+.confirm-icon.icon-warning {
+  color: var(--warning);
+}
+
+.confirm-close-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition);
+}
+
+.confirm-close-btn:hover {
+  background: var(--bg-input);
+  color: var(--text);
+}
+
+.confirm-body {
+  padding: 1.5rem;
+}
+
+.confirm-body p {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.confirm-footer {
+  padding: 1rem 1.5rem;
+  background: var(--bg);
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+@keyframes confirmFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes confirmSlideUp {
+  from {
+    transform: translateY(15px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}

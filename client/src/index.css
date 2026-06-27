@@ -178,6 +178,28 @@ img {
   width: 100%;
 }
 
+.btn-sm {
+  padding: 0.45rem 1rem;
+  font-size: 0.82rem;
+}
+
+/* --- Error Card --- */
+.error-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.error-card h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.error-card p {
+  font-size: 0.9rem;
+}
+
 /* --- Form Elements --- */
 .form-group {
   margin-bottom: 1.1rem;

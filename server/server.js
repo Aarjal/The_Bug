@@ -9,6 +9,7 @@ const itemRoutes = require("./routes/items");
 const notificationRoutes = require("./routes/notifications");
 const recoveryRequestRoutes = require("./routes/recoveryRequests");
 const userRoutes = require("./routes/users");
+const adminRoutes = require("./routes/admin");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -23,6 +24,7 @@ app.use("/api/items", itemRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/recovery-requests", recoveryRequestRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/admin", adminRoutes);
 
 // Health check
 app.get("/api/health", (req, res) => {

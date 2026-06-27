@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
-import { SearchX, Inbox, RefreshCw, ChevronLeft, ChevronRight } from "lucide-react";
+import { SearchX, Inbox, RefreshCw, ChevronLeft, ChevronRight, AlertCircle } from "lucide-react";
 import { getFeed } from "../api/services";
 import { CATEGORIES } from "../utils/helpers";
 import ItemCard from "../components/ItemCard";
+import SearchBar from "../components/SearchBar";
+import FilterPanel from "../components/FilterPanel";
 import "../styles/Feed.css";
 
 export default function Feed() {
@@ -15,14 +17,59 @@ export default function Feed() {
     hasPreviousPage: false,
   });
 
+  // Raw inputs (need to be debounced)
+  const [searchVal, setSearchVal] = useState("");
+  const [locationVal, setLocationVal] = useState("");
+
   // Query Filters State
+  const [q, setQ] = useState("");
   const [type, setType] = useState(""); // "" (All), "lost", "found"
   const [category, setCategory] = useState("");
   const [status, setStatus] = useState("active"); // default active-first
+  const [location, setLocation] = useState("");
+  const [sort, setSort] = useState("newest");
   const [page, setPage] = useState(1);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  // Categories list state (initialized with helpers CATEGORIES, dynamically extended if needed)
+  const [categoriesList, setCategoriesList] = useState(CATEGORIES);
+
+  // Debounce search input q (350ms delay)
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setQ(searchVal);
+      setPage(1);
+    }, 350);
+    return () => clearTimeout(handler);
+  }, [searchVal]);
+
+  // Debounce location input (350ms delay)
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setLocation(locationVal);
+      setPage(1);
+    }, 350);
+    return () => clearTimeout(handler);
+  }, [locationVal]);
+
+  // Populate categories dynamically from current feed items if available
+  useEffect(() => {
+    if (items && items.length > 0) {
+      const itemCategories = [...new Set(items.map((item) => item.category))].filter(Boolean);
+      const updatedList = [...CATEGORIES];
+      itemCategories.forEach((catVal) => {
+        if (!updatedList.some((c) => c.value === catVal)) {
+          updatedList.push({
+            value: catVal,
+            label: catVal.charAt(0).toUpperCase() + catVal.slice(1),
+          });
+        }
+      });
+      setCategoriesList(updatedList);
+    }
+  }, [items]);
 
   const fetchItems = async () => {
     setLoading(true);
@@ -31,9 +78,12 @@ export default function Feed() {
       const params = {
         page,
         limit: 12,
-        status: status || undefined,
+        q: q || undefined,
         type: type || undefined,
         category: category || undefined,
+        status: status || undefined,
+        location: location || undefined,
+        sort: sort || undefined,
       };
 
       const { data } = await getFeed(params);
@@ -46,12 +96,22 @@ export default function Feed() {
     }
   };
 
-  // Refetch items when filters or page change
+  // Refetch items when any filter or page changes
   useEffect(() => {
     fetchItems();
-  }, [type, category, status, page]);
+  }, [q, type, category, status, location, sort, page]);
 
-  // Reset page to 1 when changing filters
+  // Check if any filter is currently applied (compared to default state)
+  const isFiltered =
+    searchVal !== "" ||
+    q !== "" ||
+    type !== "" ||
+    category !== "" ||
+    status !== "active" ||
+    locationVal !== "" ||
+    location !== "" ||
+    sort !== "newest";
+
   const handleTypeChange = (newType) => {
     setType(newType);
     setPage(1);
@@ -67,10 +127,24 @@ export default function Feed() {
     setPage(1);
   };
 
+  const handleLocationChange = (e) => {
+    setLocationVal(e.target.value);
+  };
+
+  const handleSortChange = (e) => {
+    setSort(e.target.value);
+    setPage(1);
+  };
+
   const resetFilters = () => {
+    setSearchVal("");
+    setQ("");
     setType("");
     setCategory("");
     setStatus("active");
+    setLocationVal("");
+    setLocation("");
+    setSort("newest");
     setPage(1);
   };
 
@@ -87,88 +161,42 @@ export default function Feed() {
           </p>
         </div>
 
-        {/* Filters Panel */}
+        {/* Filters Panel containing Search and Filters */}
         <div className="filter-panel">
-          <div className="filter-left">
-            {/* Type tabs */}
-            <div className="type-tabs">
-              <button
-                className={`type-tab ${type === "" ? "active" : ""}`}
-                onClick={() => handleTypeChange("")}
-              >
-                All Items
-              </button>
-              <button
-                className={`type-tab ${type === "lost" ? "active" : ""}`}
-                onClick={() => handleTypeChange("lost")}
-              >
-                Lost
-              </button>
-              <button
-                className={`type-tab ${type === "found" ? "active" : ""}`}
-                onClick={() => handleTypeChange("found")}
-              >
-                Found
-              </button>
-            </div>
+          {/* Search bar row */}
+          <SearchBar value={searchVal} onChange={(e) => setSearchVal(e.target.value)} />
 
-            {/* Category selection */}
-            <div className="filter-select-wrapper">
-              <label htmlFor="feed-category-filter" className="sr-only">
-                Filter by Category
-              </label>
-              <select
-                id="feed-category-filter"
-                className="form-select"
-                value={category}
-                onChange={handleCategoryChange}
-              >
-                <option value="">All Categories</option>
-                {CATEGORIES.map((cat) => (
-                  <option key={cat.value} value={cat.value}>
-                    {cat.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Status selection */}
-            <div className="filter-select-wrapper">
-              <label htmlFor="feed-status-filter" className="sr-only">
-                Filter by Status
-              </label>
-              <select
-                id="feed-status-filter"
-                className="form-select"
-                value={status}
-                onChange={handleStatusChange}
-              >
-                <option value="active">Active Only</option>
-                <option value="resolved">Resolved Only</option>
-                <option value="">All Statuses</option>
-              </select>
-            </div>
-          </div>
-
-          <div className="filter-right">
-            {(type !== "" || category !== "" || status !== "active") && (
-              <button
-                onClick={resetFilters}
-                className="btn btn-outline"
-                style={{ padding: "0.5rem 1rem", fontSize: "0.85rem", height: "38px" }}
-              >
-                Reset Filters
-              </button>
-            )}
-          </div>
+          {/* Filters controls row */}
+          <FilterPanel
+            type={type}
+            onTypeChange={handleTypeChange}
+            category={category}
+            onCategoryChange={handleCategoryChange}
+            categoriesList={categoriesList}
+            status={status}
+            onStatusChange={handleStatusChange}
+            location={locationVal}
+            onLocationChange={handleLocationChange}
+            sort={sort}
+            onSortChange={handleSortChange}
+            onReset={resetFilters}
+            isFiltered={isFiltered}
+          />
         </div>
 
         {/* Error Alert */}
         {error && (
-          <div className="alert alert-error" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <span>{error}</span>
-            <button onClick={fetchItems} className="btn btn-outline btn-sm" style={{ padding: "0.35rem 0.75rem", border: "1px solid #feb2b2" }}>
-              <RefreshCw size={14} style={{ marginRight: "0.25rem" }} /> Retry
+          <div className="error-card card" style={{ maxWidth: "480px", margin: "2rem auto", padding: "2rem", textAlign: "center" }}>
+            <AlertCircle size={40} style={{ color: "var(--danger)", marginBottom: "1rem" }} />
+            <h3 style={{ marginBottom: "0.5rem" }}>Failed to load feed</h3>
+            <p style={{ color: "var(--text-secondary)", marginBottom: "1.5rem" }}>{error}</p>
+            <button
+              onClick={fetchItems}
+              className="btn btn-primary"
+              style={{ display: "inline-flex", margin: "0 auto", gap: "0.5rem" }}
+            >
+              <RefreshCw size={16} />
+              <span>Retry</span>
             </button>
           </div>
         )}
@@ -234,18 +262,23 @@ export default function Feed() {
           // Empty State
           <div className="empty-state">
             <div className="empty-state-icon">
-              {category || type || status !== "active" ? <SearchX size={32} /> : <Inbox size={32} />}
+              {isFiltered ? <SearchX size={32} /> : <Inbox size={32} />}
             </div>
             <h3>No reports found</h3>
             <p>
-              We couldn&apos;t find any items matching your filters. Try resetting them or check back later!
+              {isFiltered
+                ? "No items match your search."
+                : "No lost or found items have been posted yet."}
             </p>
-            <button onClick={resetFilters} className="btn btn-primary" style={{ padding: "0.55rem 1.25rem" }}>
-              Show All Items
-            </button>
+            {isFiltered && (
+              <button onClick={resetFilters} className="btn btn-primary" style={{ padding: "0.55rem 1.25rem" }}>
+                Clear Filters
+              </button>
+            )}
           </div>
         )}
       </div>
     </div>
   );
 }
+

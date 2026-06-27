@@ -1,8 +1,9 @@
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Bell, CheckSquare, Trash2, Compass, ArrowRight } from "lucide-react";
+import { Bell, CheckSquare, Trash2, Compass, ArrowRight, AlertCircle, RefreshCw } from "lucide-react";
 import { useNotifications } from "../context/NotificationContext";
 import { formatRelativeTime } from "../utils/helpers";
+import ConfirmationModal from "../components/ConfirmationModal";
 import "../styles/Notifications.css";
 
 export default function Notifications() {
@@ -17,28 +18,41 @@ export default function Notifications() {
     deleteNotification,
   } = useNotifications();
 
+  // Confirmation Modal State
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [confirmId, setConfirmId] = useState(null);
+
   useEffect(() => {
     fetchNotifications();
   }, []);
 
   const handleCardClick = (notification) => {
-    // 1. Mark as read on the backend/state if unread
     if (!notification.read) {
       markAsRead(notification._id);
     }
     
-    // 2. Navigate to matched item details if available, otherwise User's item
-    const targetItemId = notification.relatedItemId?._id || notification.relatedItemId || notification.itemId?._id || notification.itemId;
+    const targetItemId =
+      notification.relatedItemId?._id ||
+      notification.relatedItemId ||
+      notification.itemId?._id ||
+      notification.itemId;
     if (targetItemId) {
       navigate(`/item/${targetItemId}`);
     }
   };
 
-  const handleDelete = (e, id) => {
-    e.stopPropagation(); // prevent card click navigation
-    if (window.confirm("Delete this notification?")) {
-      deleteNotification(id);
+  const handleDeleteClick = (e, id) => {
+    e.stopPropagation();
+    setConfirmId(id);
+    setIsConfirmOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    if (confirmId) {
+      deleteNotification(confirmId);
     }
+    setIsConfirmOpen(false);
+    setConfirmId(null);
   };
 
   return (
@@ -63,11 +77,34 @@ export default function Notifications() {
 
       {/* Content wrapper */}
       {loading ? (
-        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "30vh" }}>
-          <div className="spinner spinner-dark" style={{ width: "2rem", height: "2rem" }} />
+        // Modern loading skeleton items
+        <div className="notifications-list">
+          {Array.from({ length: 4 }).map((_, idx) => (
+            <div key={idx} className="skeleton-card" style={{ height: "80px", padding: "1rem", marginBottom: "0.75rem" }}>
+              <div style={{ display: "flex", gap: "1rem", width: "100%", height: "100%", alignItems: "center" }}>
+                <div className="skeleton-avatar" style={{ width: "40px", height: "40px", flexShrink: 0 }} />
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", flex: 1 }}>
+                  <div className="skeleton-line" style={{ width: "80%" }} />
+                  <div className="skeleton-line" style={{ width: "30%" }} />
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       ) : error ? (
-        <div className="alert alert-error">{error}</div>
+        <div className="error-card card" style={{ maxWidth: "480px", margin: "2rem auto", padding: "2rem", textAlign: "center" }}>
+          <AlertCircle size={40} style={{ color: "var(--danger)", marginBottom: "1rem" }} />
+          <h3 style={{ marginBottom: "0.5rem" }}>Failed to load notifications</h3>
+          <p style={{ color: "var(--text-secondary)", marginBottom: "1.5rem" }}>{error}</p>
+          <button
+            onClick={fetchNotifications}
+            className="btn btn-primary"
+            style={{ display: "inline-flex", margin: "0 auto", gap: "0.5rem" }}
+          >
+            <RefreshCw size={16} />
+            <span>Retry</span>
+          </button>
+        </div>
       ) : notifications.length > 0 ? (
         <div className="notifications-list">
           {notifications.map((n) => {
@@ -97,7 +134,7 @@ export default function Notifications() {
                 <div style={{ display: "flex", alignItems: "center", gap: "0.8rem", alignSelf: "stretch" }}>
                   {!n.read && <div className="unread-indicator-dot" />}
                   <button
-                    onClick={(e) => handleDelete(e, n._id)}
+                    onClick={(e) => handleDeleteClick(e, n._id)}
                     className="notification-delete-btn"
                     title="Delete notification"
                   >
@@ -113,10 +150,22 @@ export default function Notifications() {
           <div className="empty-state-icon">
             <Compass size={32} />
           </div>
-          <h3>All caught up!</h3>
+          <h3>You're all caught up!</h3>
           <p>You have no notifications at the moment. We will notify you when a match is found.</p>
         </div>
       )}
+
+      {/* Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={isConfirmOpen}
+        title="Delete Notification"
+        message="Are you sure you want to delete this notification?"
+        confirmText="Delete"
+        cancelText="Cancel"
+        type="danger"
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setIsConfirmOpen(false)}
+      />
     </div>
   );
 }

@@ -11,7 +11,9 @@ import {
   Mail, 
   ExternalLink,
   MessageCircle,
-  Inbox
+  Inbox,
+  AlertCircle,
+  RefreshCw
 } from "lucide-react";
 import { 
   getReceivedRecoveryRequests, 
@@ -21,6 +23,7 @@ import {
 } from "../api/services";
 import { useToast } from "../context/ToastContext";
 import { formatDate } from "../utils/helpers";
+import ConfirmationModal from "../components/ConfirmationModal";
 import "../styles/Claims.css";
 
 export default function RecoveryRequests() {
@@ -28,12 +31,25 @@ export default function RecoveryRequests() {
   const [receivedRequests, setReceivedRequests] = useState([]);
   const [sentRequests, setSentRequests] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [actionLoadingId, setActionLoadingId] = useState(null);
   
   const { addToast } = useToast();
 
+  // Confirmation Modal State
+  const [confirmModal, setConfirmModal] = useState({
+    isOpen: false,
+    id: "",
+    action: "", // "accept" | "reject"
+    title: "",
+    message: "",
+    buttonType: "warning",
+    confirmText: "Confirm",
+  });
+
   const fetchRequests = async () => {
     setLoading(true);
+    setError("");
     try {
       const [receivedRes, sentRes] = await Promise.all([
         getReceivedRecoveryRequests(),
@@ -43,7 +59,7 @@ export default function RecoveryRequests() {
       setSentRequests(sentRes.data.requests || []);
     } catch (err) {
       console.error("Failed to fetch recovery requests:", err);
-      addToast("Failed to load recovery requests.", "error");
+      setError("Failed to load recovery requests.");
     } finally {
       setLoading(false);
     }
@@ -53,28 +69,42 @@ export default function RecoveryRequests() {
     fetchRequests();
   }, []);
 
-  const handleStatusUpdate = async (id, action) => {
-    const confirmationMsg = action === "accept" 
-      ? "Are you sure you want to approve this recovery claim? This will share your contact information with the claimant." 
+  const handleStatusUpdateClick = (id, action) => {
+    const title = action === "accept" ? "Approve Claim" : "Reject Claim";
+    const message = action === "accept"
+      ? "Are you sure you want to approve this recovery claim? This will share your contact information with the claimant."
       : "Are you sure you want to reject this recovery claim?";
-      
-    if (!window.confirm(confirmationMsg)) return;
+    const buttonType = action === "accept" ? "warning" : "danger";
+    const confirmText = action === "accept" ? "Approve" : "Reject";
+
+    setConfirmModal({
+      isOpen: true,
+      id,
+      action,
+      title,
+      message,
+      buttonType,
+      confirmText,
+    });
+  };
+
+  const handleConfirmStatusUpdate = async () => {
+    const { id, action } = confirmModal;
+    setConfirmModal((prev) => ({ ...prev, isOpen: false }));
 
     setActionLoadingId(id);
     try {
       if (action === "accept") {
         const { data } = await acceptRecoveryRequest(id);
         addToast("Claim approved successfully!", "success");
-        // Update local state
-        setReceivedRequests(prev => 
-          prev.map(req => req._id === id ? data.request : req)
+        setReceivedRequests((prev) =>
+          prev.map((req) => (req._id === id ? data.request : req))
         );
       } else {
         const { data } = await rejectRecoveryRequest(id);
         addToast("Claim rejected.", "info");
-        // Update local state
-        setReceivedRequests(prev => 
-          prev.map(req => req._id === id ? data.request : req)
+        setReceivedRequests((prev) =>
+          prev.map((req) => (req._id === id ? data.request : req))
         );
       }
     } catch (err) {
@@ -142,13 +172,40 @@ export default function RecoveryRequests() {
       </div>
 
       {loading ? (
-        <div style={{ display: "flex", justifyContent: "center", padding: "4rem" }}>
-          <div className="spinner" />
+        // Modern loading skeleton
+        <div className="claims-grid">
+          {Array.from({ length: 2 }).map((_, idx) => (
+            <div key={idx} className="skeleton-card" style={{ height: "200px", padding: "1.5rem", borderRadius: "var(--radius-md)" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.85rem", height: "100%" }}>
+                <div style={{ display: "flex", justifyContent: "space-between" }}>
+                  <div className="skeleton-line" style={{ width: "25%" }} />
+                  <div className="skeleton-line" style={{ width: "35%" }} />
+                </div>
+                <div className="skeleton-line" style={{ width: "50%", height: "22px" }} />
+                <div className="skeleton-line" style={{ width: "80%" }} />
+                <div className="skeleton-line" style={{ width: "40%" }} />
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : error ? (
+        <div className="error-card card" style={{ maxWidth: "480px", margin: "2rem auto", padding: "2rem", textAlign: "center" }}>
+          <AlertCircle size={40} style={{ color: "var(--danger)", marginBottom: "1rem" }} />
+          <h3 style={{ marginBottom: "0.5rem" }}>Failed to load requests</h3>
+          <p style={{ color: "var(--text-secondary)", marginBottom: "1.5rem" }}>{error}</p>
+          <button
+            onClick={fetchRequests}
+            className="btn btn-primary"
+            style={{ display: "inline-flex", margin: "0 auto", gap: "0.5rem" }}
+          >
+            <RefreshCw size={16} />
+            <span>Retry</span>
+          </button>
         </div>
       ) : currentRequests.length === 0 ? (
         <div className="empty-state" style={{ padding: "4rem" }}>
           <Inbox size={48} className="text-muted" style={{ marginBottom: "1rem" }} />
-          <h3>No requests found</h3>
+          <h3>No recovery requests</h3>
           <p className="text-secondary">
             {activeTab === "received" 
               ? "You haven't received any recovery claims for your found items yet."
@@ -163,8 +220,6 @@ export default function RecoveryRequests() {
             const isRejected = req.status === "rejected";
             const showButtons = activeTab === "received" && isPending;
             const targetItem = req.item;
-
-            // In received tab, target is the claimant. In sent tab, target is the finder.
             const partnerUser = activeTab === "received" ? req.claimant : req.finder;
 
             return (
@@ -243,14 +298,14 @@ export default function RecoveryRequests() {
                   <div className="claim-card-actions">
                     <button
                       className="btn btn-outline btn-sm"
-                      onClick={() => handleStatusUpdate(req._id, "reject")}
+                      onClick={() => handleStatusUpdateClick(req._id, "reject")}
                       disabled={actionLoadingId === req._id}
                     >
                       Reject
                     </button>
                     <button
                       className="btn btn-accent btn-sm"
-                      onClick={() => handleStatusUpdate(req._id, "accept")}
+                      onClick={() => handleStatusUpdateClick(req._id, "accept")}
                       disabled={actionLoadingId === req._id}
                     >
                       {actionLoadingId === req._id ? "Processing..." : "Accept"}
@@ -262,6 +317,18 @@ export default function RecoveryRequests() {
           })}
         </div>
       )}
+
+      {/* Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={confirmModal.isOpen}
+        title={confirmModal.title}
+        message={confirmModal.message}
+        confirmText={confirmModal.confirmText}
+        cancelText="Cancel"
+        type={confirmModal.buttonType}
+        onConfirm={handleConfirmStatusUpdate}
+        onCancel={() => setConfirmModal((prev) => ({ ...prev, isOpen: false }))}
+      />
     </div>
   );
 }

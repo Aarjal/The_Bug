@@ -25,9 +25,7 @@ export const deleteNotification = (id) =>
   API.delete(`/notifications/${id}`);
 
 // --- Admin ---
-export const getAdminStats = () => API.get("/admin/stats");
-export const getAdminItems = () => API.get("/admin/items");
-export const adminDeleteItem = (id) => API.delete(`/admin/items/${id}`);
+export const getAdminDashboard = () => API.get("/admin/dashboard");
 
 // --- Recovery Requests ---
 export const createRecoveryRequest = (data) => API.post("/recovery-requests", data);

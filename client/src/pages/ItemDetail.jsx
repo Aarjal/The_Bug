@@ -1,16 +1,18 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { MapPin, Calendar, Compass, User, Edit2, CheckCircle, Trash2, ArrowLeft, RefreshCw, X } from "lucide-react";
+import { MapPin, Calendar, Compass, User, Edit2, CheckCircle, Trash2, ArrowLeft, RefreshCw, X, AlertCircle } from "lucide-react";
 import { getItem, deleteItem, resolveItem, getItemMatches, createRecoveryRequest, getSentRecoveryRequests } from "../api/services";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 import { formatDate } from "../utils/helpers";
+import ConfirmationModal from "../components/ConfirmationModal";
 import "../styles/DetailAndMyItems.css";
 
 export default function ItemDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { addToast } = useToast();
 
   const [item, setItem] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -28,78 +30,106 @@ export default function ItemDetail() {
   const [claimSubmitLoading, setClaimSubmitLoading] = useState(false);
   const [claimError, setClaimError] = useState("");
 
-  useEffect(() => {
-    const fetchItemAndMatches = async () => {
-      setLoading(true);
-      setError("");
-      try {
-        const { data } = await getItem(id);
-        setItem(data);
+  // Confirmation Modal State
+  const [confirmModal, setConfirmModal] = useState({
+    isOpen: false,
+    type: "", // "resolve" | "delete"
+    title: "",
+    message: "",
+    buttonType: "warning", // "warning" | "danger"
+    confirmText: "Confirm",
+  });
 
-        const ownerId = data.userId?._id || data.userId;
-        const isOwner = user && ownerId && user._id.toString() === ownerId.toString();
-
-        if (isOwner) {
-          setMatchesLoading(true);
-          try {
-            const { data: matchesData } = await getItemMatches(id);
-            setMatches(matchesData);
-          } catch (matchErr) {
-            console.error("Failed to load matches:", matchErr);
-          } finally {
-            setMatchesLoading(false);
-          }
-        } else if (user && data.type === "found") {
-          try {
-            const { data: sentData } = await getSentRecoveryRequests();
-            const alreadySent = sentData.requests.some((req) => {
-              const reqItemId = req.item?._id || req.item;
-              return reqItemId.toString() === id.toString();
-            });
-            setHasSentRequest(alreadySent);
-          } catch (sentErr) {
-            console.error("Failed to load sent recovery requests:", sentErr);
-          }
-        }
-      } catch (err) {
-        setError("Report not found or has been deleted.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchItemAndMatches();
-  }, [id, user]);
-
-  const { addToast } = useToast();
-
-  const handleResolve = async () => {
-    if (!window.confirm("Are you sure you want to mark this item as resolved?")) return;
-
-    setActionLoading(true);
+  const fetchItemAndMatches = async () => {
+    setLoading(true);
+    setError("");
     try {
-      const { data } = await resolveItem(id);
-      setItem(data); // update local state status
-      addToast("Item successfully marked as resolved!", "success");
+      const { data } = await getItem(id);
+      setItem(data);
+
+      const ownerId = data.userId?._id || data.userId;
+      const isOwner = user && ownerId && user._id.toString() === ownerId.toString();
+
+      if (isOwner) {
+        setMatchesLoading(true);
+        try {
+          const { data: matchesData } = await getItemMatches(id);
+          setMatches(matchesData);
+        } catch (matchErr) {
+          console.error("Failed to load matches:", matchErr);
+        } finally {
+          setMatchesLoading(false);
+        }
+      } else if (user && data.type === "found") {
+        try {
+          const { data: sentData } = await getSentRecoveryRequests();
+          const alreadySent = sentData.requests.some((req) => {
+            const reqItemId = req.item?._id || req.item;
+            return reqItemId.toString() === id.toString();
+          });
+          setHasSentRequest(alreadySent);
+        } catch (sentErr) {
+          console.error("Failed to load sent recovery requests:", sentErr);
+        }
+      }
     } catch (err) {
-      addToast("Failed to mark item as resolved. Please try again.", "error");
+      setError("Report not found or has been deleted.");
     } finally {
-      setActionLoading(false);
+      setLoading(false);
     }
   };
 
-  const handleDelete = async () => {
-    if (!window.confirm("Are you sure you want to permanently delete this report? This cannot be undone.")) return;
+  useEffect(() => {
+    fetchItemAndMatches();
+  }, [id, user]);
 
+  const triggerResolveConfirm = () => {
+    setConfirmModal({
+      isOpen: true,
+      type: "resolve",
+      title: "Resolve Item",
+      message: "Are you sure you want to mark this item as resolved?",
+      buttonType: "warning",
+      confirmText: "Resolve",
+    });
+  };
+
+  const triggerDeleteConfirm = () => {
+    setConfirmModal({
+      isOpen: true,
+      type: "delete",
+      title: "Delete Report",
+      message: "Are you sure you want to permanently delete this report? This cannot be undone.",
+      buttonType: "danger",
+      confirmText: "Delete",
+    });
+  };
+
+  const handleConfirmAction = async () => {
+    const { type } = confirmModal;
+    setConfirmModal((prev) => ({ ...prev, isOpen: false }));
     setActionLoading(true);
-    try {
-      await deleteItem(id);
-      addToast("Report deleted successfully.", "success");
-      navigate("/", { replace: true });
-    } catch (err) {
-      addToast("Failed to delete report. Please try again.", "error");
-    } finally {
-      setActionLoading(false);
+
+    if (type === "resolve") {
+      try {
+        const { data } = await resolveItem(id);
+        setItem(data);
+        addToast("Item successfully marked as resolved!", "success");
+      } catch (err) {
+        addToast("Failed to mark item as resolved. Please try again.", "error");
+      } finally {
+        setActionLoading(false);
+      }
+    } else if (type === "delete") {
+      try {
+        await deleteItem(id);
+        addToast("Report deleted successfully.", "success");
+        navigate("/", { replace: true });
+      } catch (err) {
+        addToast("Failed to delete report. Please try again.", "error");
+      } finally {
+        setActionLoading(false);
+      }
     }
   };
 
@@ -126,16 +156,22 @@ export default function ItemDetail() {
   if (loading) {
     return (
       <div className="container main-content" style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "50vh" }}>
-        <div className="spinner spinner-dark" style={{ width: "2rem", height: "2rem" }} />
+        <div className="spinner spinner-dark" style={{ width: "2.5rem", height: "2.5rem" }} />
       </div>
     );
   }
 
   if (error || !item) {
     return (
-      <div className="container main-content" style={{ textAlign: "center", padding: "3rem 1rem" }}>
-        <div className="alert alert-error" style={{ maxWidth: "480px", margin: "0 auto 1.5rem" }}>{error}</div>
-        <button onClick={() => navigate("/")} className="btn btn-primary">Go to Home Feed</button>
+      <div className="container main-content" style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "40vh" }}>
+        <div className="error-card card" style={{ maxWidth: "480px", margin: "2rem auto", padding: "2rem", textAlign: "center" }}>
+          <AlertCircle size={40} style={{ color: "var(--danger)", marginBottom: "1rem" }} />
+          <h3 style={{ marginBottom: "0.5rem" }}>Report Not Found</h3>
+          <p style={{ color: "var(--text-secondary)", marginBottom: "1.5rem" }}>{error || "The report you are looking for has been deleted or does not exist."}</p>
+          <button onClick={() => navigate("/")} className="btn btn-primary" style={{ margin: "0 auto" }}>
+            Go to Home Feed
+          </button>
+        </div>
       </div>
     );
   }
@@ -250,7 +286,7 @@ export default function ItemDetail() {
               <div className="owner-buttons-row">
                 {item.status === "active" && (
                   <button
-                    onClick={handleResolve}
+                    onClick={triggerResolveConfirm}
                     className="btn btn-accent"
                     style={{ flex: 1, minWidth: "140px" }}
                     disabled={actionLoading}
@@ -269,7 +305,7 @@ export default function ItemDetail() {
                   <span>Edit Report</span>
                 </Link>
                 <button
-                  onClick={handleDelete}
+                  onClick={triggerDeleteConfirm}
                   className="btn btn-danger"
                   style={{ flex: 1, minWidth: "100px" }}
                   disabled={actionLoading}
@@ -409,6 +445,18 @@ export default function ItemDetail() {
           </div>
         </div>
       )}
+
+      {/* Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={confirmModal.isOpen}
+        title={confirmModal.title}
+        message={confirmModal.message}
+        confirmText={confirmModal.confirmText}
+        cancelText="Cancel"
+        type={confirmModal.buttonType}
+        onConfirm={handleConfirmAction}
+        onCancel={() => setConfirmModal((prev) => ({ ...prev, isOpen: false }))}
+      />
     </div>
   );
 }

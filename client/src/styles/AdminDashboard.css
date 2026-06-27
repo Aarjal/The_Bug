@@ -1,0 +1,360 @@
+/* ========================================
+   Admin Dashboard — Styles
+   ======================================== */
+
+/* --- Page Header --- */
+.admin-header {
+  margin-bottom: 2rem;
+}
+
+.admin-header h1 {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: var(--primary);
+  margin-bottom: 0.25rem;
+}
+
+.admin-header p {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+}
+
+/* --- Section Blocks --- */
+.admin-section {
+  margin-bottom: 2.25rem;
+}
+
+.admin-section-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.admin-section-title svg {
+  color: var(--primary);
+}
+
+/* --- Stat Cards Grid --- */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+/* Individual Stat Card */
+.stat-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+  transition: all var(--transition);
+  box-shadow: var(--shadow-sm);
+}
+
+.stat-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+/* Icon Container — base */
+.stat-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  flex-shrink: 0;
+}
+
+/* Color Modifiers */
+.stat-icon--blue {
+  background: rgba(26, 72, 142, 0.1);
+  color: var(--primary);
+}
+
+.stat-icon--teal {
+  background: rgba(56, 178, 172, 0.12);
+  color: var(--accent);
+}
+
+.stat-icon--green {
+  background: rgba(72, 187, 120, 0.12);
+  color: var(--success);
+}
+
+.stat-icon--amber {
+  background: rgba(236, 201, 75, 0.15);
+  color: #b7791f;
+}
+
+.stat-icon--red {
+  background: rgba(245, 101, 101, 0.1);
+  color: var(--danger);
+}
+
+.stat-icon--purple {
+  background: rgba(128, 90, 213, 0.1);
+  color: #6b46c1;
+}
+
+.stat-icon--indigo {
+  background: rgba(99, 102, 241, 0.1);
+  color: #4f46e5;
+}
+
+/* Stat Text */
+.stat-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.stat-title {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.stat-value {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.2;
+}
+
+/* --- Category Grid --- */
+.category-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 0.75rem;
+}
+
+.category-card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0.85rem 1rem;
+  transition: all var(--transition);
+}
+
+.category-card:hover {
+  border-color: var(--primary-light);
+  box-shadow: var(--shadow-sm);
+}
+
+.category-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  background: rgba(26, 72, 142, 0.08);
+  color: var(--primary);
+  flex-shrink: 0;
+}
+
+.category-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.category-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.category-count {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+}
+
+/* --- Activity Table --- */
+.activity-table-wrapper {
+  overflow-x: auto;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.activity-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.activity-table thead {
+  background: var(--bg);
+}
+
+.activity-table th {
+  text-align: left;
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-secondary);
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.activity-table td {
+  padding: 0.85rem 1rem;
+  font-size: 0.9rem;
+  color: var(--text);
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+
+.activity-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.activity-table tbody tr {
+  transition: background var(--transition);
+}
+
+.activity-table tbody tr:hover {
+  background: var(--bg);
+}
+
+.activity-title {
+  font-weight: 600;
+  max-width: 280px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.activity-owner {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.activity-date {
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+/* Active badge (not in global index.css) */
+.badge-active {
+  background: rgba(56, 178, 172, 0.12);
+  color: #234e52;
+}
+
+/* --- Loading / Empty States --- */
+.admin-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 40vh;
+  gap: 1rem;
+}
+
+.admin-loading-text {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+}
+
+.admin-empty-text {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  text-align: center;
+  padding: 2rem 0;
+}
+
+/* --- Responsive --- */
+
+/* Tablet */
+@media (max-width: 768px) {
+  .stat-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .category-grid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  }
+
+  .admin-header h1 {
+    font-size: 1.5rem;
+  }
+}
+
+/* Mobile */
+@media (max-width: 500px) {
+  .stat-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .category-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .admin-header h1 {
+    font-size: 1.3rem;
+  }
+
+  /* Table → stacked card layout */
+  .activity-table thead {
+    display: none;
+  }
+
+  .activity-table,
+  .activity-table tbody,
+  .activity-table tr,
+  .activity-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .activity-table tr {
+    border-bottom: 1px solid var(--border);
+    padding: 0.75rem 0;
+  }
+
+  .activity-table tbody tr:last-child {
+    border-bottom: none;
+  }
+
+  .activity-table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.45rem 1rem;
+    border-bottom: none;
+  }
+
+  .activity-table td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    flex-shrink: 0;
+    margin-right: 1rem;
+  }
+
+  .activity-title {
+    max-width: none;
+    white-space: normal;
+    text-align: right;
+  }
+}

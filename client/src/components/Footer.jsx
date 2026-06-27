@@ -12,6 +12,6 @@ export default function Footer() {
           Made with <Heart size={12} fill="var(--danger)" color="var(--danger)" /> for the community.
         </p>
       </div>
-    </footer
+    </footer>
   );
 }

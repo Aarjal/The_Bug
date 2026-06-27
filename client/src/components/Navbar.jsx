@@ -17,7 +17,7 @@ import "../styles/Layout.css";
 
 export default function Navbar() {
   const { user, logout } = useAuth();
-  const { unreadCount } = useNotifications();
+  const { unreadCount, unreadClaimsCount } = useNotifications();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -90,9 +90,33 @@ export default function Navbar() {
                 </NavLink>
               </li>
               <li>
-                <NavLink to="/claims" className="nav-link">
+                <NavLink to="/claims" className="nav-link" style={{ position: "relative" }}>
                   <FileCheck size={18} />
                   <span>Claims</span>
+                  {unreadClaimsCount > 0 && (
+                    <span
+                      style={{
+                        position: "absolute",
+                        top: "2px",
+                        left: "22px",
+                        background: "var(--danger)",
+                        color: "#fff",
+                        fontSize: "0.65rem",
+                        fontWeight: "bold",
+                        borderRadius: "50%",
+                        minWidth: "16px",
+                        height: "16px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        padding: "0 4px",
+                        boxShadow: "0 0 0 2px #fff",
+                        lineHeight: 1
+                      }}
+                    >
+                      {unreadClaimsCount}
+                    </span>
+                  )}
                 </NavLink>
               </li>
               <li>
@@ -199,7 +223,7 @@ export default function Navbar() {
           style={{ position: "relative" }}
         >
           {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          {!mobileMenuOpen && unreadCount > 0 && (
+          {!mobileMenuOpen && (unreadCount > 0 || unreadClaimsCount > 0) && (
             <span
               style={{
                 position: "absolute",
@@ -241,9 +265,32 @@ export default function Navbar() {
                 <FileText size={18} />
                 <span>My Items</span>
               </NavLink>
-              <NavLink to="/claims" className="mobile-nav-link">
+              <NavLink to="/claims" className="mobile-nav-link" style={{ position: "relative" }}>
                 <FileCheck size={18} />
                 <span>Claims</span>
+                {unreadClaimsCount > 0 && (
+                  <span
+                    style={{
+                      position: "absolute",
+                      top: "10px",
+                      left: "24px",
+                      background: "var(--danger)",
+                      color: "#fff",
+                      fontSize: "0.62rem",
+                      fontWeight: "bold",
+                      borderRadius: "50%",
+                      minWidth: "15px",
+                      height: "15px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      padding: "0 3px",
+                      lineHeight: 1
+                    }}
+                  >
+                    {unreadClaimsCount}
+                  </span>
+                )}
               </NavLink>
               <NavLink to="/notifications" className="mobile-nav-link" style={{ position: "relative" }}>
                 <Bell size={18} />

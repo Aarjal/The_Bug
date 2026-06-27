@@ -19,14 +19,17 @@ import {
   getReceivedRecoveryRequests, 
   getSentRecoveryRequests, 
   acceptRecoveryRequest, 
-  rejectRecoveryRequest 
+  rejectRecoveryRequest,
+  markClaimsRead
 } from "../api/services";
 import { useToast } from "../context/ToastContext";
+import { useNotifications } from "../context/NotificationContext";
 import { formatDate } from "../utils/helpers";
 import ConfirmationModal from "../components/ConfirmationModal";
 import "../styles/Claims.css";
 
 export default function RecoveryRequests() {
+  const { fetchUnreadCount } = useNotifications();
   const [activeTab, setActiveTab] = useState("received"); // "received" | "sent"
   const [receivedRequests, setReceivedRequests] = useState([]);
   const [sentRequests, setSentRequests] = useState([]);
@@ -57,6 +60,11 @@ export default function RecoveryRequests() {
       ]);
       setReceivedRequests(receivedRes.data.requests || []);
       setSentRequests(sentRes.data.requests || []);
+
+      // Mark claims read for current tab and refresh badge count
+      const role = activeTab === "received" ? "finder" : "claimant";
+      await markClaimsRead(role);
+      fetchUnreadCount();
     } catch (err) {
       console.error("Failed to fetch recovery requests:", err);
       setError("Failed to load recovery requests.");
@@ -67,7 +75,7 @@ export default function RecoveryRequests() {
 
   useEffect(() => {
     fetchRequests();
-  }, []);
+  }, [activeTab]);
 
   const handleStatusUpdateClick = (id, action) => {
     const title = action === "accept" ? "Approve Claim" : "Reject Claim";
@@ -156,20 +164,68 @@ export default function RecoveryRequests() {
       </div>
 
       {/* Tabs Navigation */}
-      <div className="claims-tabs">
-        <button 
-          className={`claims-tab ${activeTab === "received" ? "active" : ""}`}
-          onClick={() => setActiveTab("received")}
-        >
-          Received Claims ({receivedRequests.length})
-        </button>
-        <button 
-          className={`claims-tab ${activeTab === "sent" ? "active" : ""}`}
-          onClick={() => setActiveTab("sent")}
-        >
-          Sent Claims ({sentRequests.length})
-        </button>
-      </div>
+      {(() => {
+        const unreadReceivedCount = receivedRequests.filter((r) => r.readByFinder === false).length;
+        const unreadSentCount = sentRequests.filter((r) => r.readByClaimant === false).length;
+        return (
+          <div className="claims-tabs">
+            <button 
+              className={`claims-tab ${activeTab === "received" ? "active" : ""}`}
+              onClick={() => setActiveTab("received")}
+              style={{ position: "relative" }}
+            >
+              Received Claims ({receivedRequests.length})
+              {unreadReceivedCount > 0 && (
+                <span
+                  style={{
+                    marginLeft: "0.5rem",
+                    background: "var(--danger)",
+                    color: "#fff",
+                    fontSize: "0.65rem",
+                    fontWeight: "bold",
+                    borderRadius: "50%",
+                    minWidth: "16px",
+                    height: "16px",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    padding: "0 4px",
+                  }}
+                >
+                  {unreadReceivedCount}
+                </span>
+              )}
+            </button>
+            <button 
+              className={`claims-tab ${activeTab === "sent" ? "active" : ""}`}
+              onClick={() => setActiveTab("sent")}
+              style={{ position: "relative" }}
+            >
+              Sent Claims ({sentRequests.length})
+              {unreadSentCount > 0 && (
+                <span
+                  style={{
+                    marginLeft: "0.5rem",
+                    background: "var(--danger)",
+                    color: "#fff",
+                    fontSize: "0.65rem",
+                    fontWeight: "bold",
+                    borderRadius: "50%",
+                    minWidth: "16px",
+                    height: "16px",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    padding: "0 4px",
+                  }}
+                >
+                  {unreadSentCount}
+                </span>
+              )}
+            </button>
+          </div>
+        );
+      })()}
 
       {loading ? (
         // Modern loading skeleton

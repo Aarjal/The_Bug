@@ -6,6 +6,7 @@ import {
   markNotificationRead,
   markAllNotificationsRead,
   deleteNotification as deleteNotificationAPI,
+  getUnreadClaimsCount as fetchUnreadClaimsCountAPI,
 } from "../api/services";
 
 const NotificationContext = createContext();
@@ -14,16 +15,21 @@ export function NotificationProvider({ children }) {
   const { user } = useAuth();
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [unreadClaimsCount, setUnreadClaimsCount] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   const fetchUnreadCount = async () => {
     if (!user) return;
     try {
-      const { data } = await fetchUnreadCountAPI();
-      setUnreadCount(data.count);
+      const [notifRes, claimsRes] = await Promise.all([
+        fetchUnreadCountAPI(),
+        fetchUnreadClaimsCountAPI(),
+      ]);
+      setUnreadCount(notifRes.data.count);
+      setUnreadClaimsCount(claimsRes.data.count);
     } catch (err) {
-      console.error("Failed to load unread count:", err);
+      console.error("Failed to load unread counts:", err);
     }
   };
 
@@ -37,6 +43,7 @@ export function NotificationProvider({ children }) {
       // Derive unread count from results to keep it synced
       const unreads = data.filter((n) => !n.read).length;
       setUnreadCount(unreads);
+      fetchUnreadCount();
     } catch (err) {
       setError("Failed to load notifications.");
     } finally {
@@ -44,7 +51,7 @@ export function NotificationProvider({ children }) {
     }
   };
 
-  // Poll for new notifications every 30 seconds if user is logged in
+  // Poll for new notifications and unread claims every 30 seconds if user is logged in
   useEffect(() => {
     if (user) {
       fetchNotifications();
@@ -55,6 +62,7 @@ export function NotificationProvider({ children }) {
     } else {
       setNotifications([]);
       setUnreadCount(0);
+      setUnreadClaimsCount(0);
     }
   }, [user]);
 
@@ -108,9 +116,11 @@ export function NotificationProvider({ children }) {
       value={{
         notifications,
         unreadCount,
+        unreadClaimsCount,
         loading,
         error,
         fetchNotifications,
+        fetchUnreadCount,
         markAsRead,
         markAllAsRead,
         deleteNotification,

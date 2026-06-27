@@ -33,3 +33,5 @@ export const getSentRecoveryRequests = () => API.get("/recovery-requests/sent");
 export const getReceivedRecoveryRequests = () => API.get("/recovery-requests/received");
 export const acceptRecoveryRequest = (id) => API.patch(`/recovery-requests/${id}/accept`);
 export const rejectRecoveryRequest = (id) => API.patch(`/recovery-requests/${id}/reject`);
+export const getUnreadClaimsCount = () => API.get("/recovery-requests/unread-count");
+export const markClaimsRead = (role) => API.patch("/recovery-requests/mark-read", { role });

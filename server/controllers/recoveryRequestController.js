@@ -100,14 +100,24 @@ const createRequest = async (req, res) => {
       claimant: claimantId,
       finder: item.userId,
       message: message || "",
+      readByFinder: false,
+      readByClaimant: true,
     });
 
-    // 8. Return populated response (no contact details on creation since status is pending)
+    // 8. Return populated response
     const populated = await recoveryRequest.populate([
       { path: "item", select: ITEM_FIELDS },
       { path: "claimant", select: USER_FIELDS_SAFE },
       { path: "finder", select: USER_FIELDS_SAFE },
     ]);
+
+    // 9. Create a Notification for the Finder
+    await Notification.create({
+      userId: item.userId,
+      itemId: item._id,
+      relatedItemId: item._id,
+      message: `New Recovery Claim! ${req.user.username} sent a claim for your found item "${item.title}".`,
+    });
 
     return res.status(201).json({
       message: "Recovery request sent successfully",
@@ -194,6 +204,8 @@ const updateStatus = async (req, res, newStatus) => {
     }
 
     recoveryRequest.status = newStatus;
+    recoveryRequest.readByFinder = true;
+    recoveryRequest.readByClaimant = false; // Claimant hasn't seen the update yet
     await recoveryRequest.save();
 
     const populated = await recoveryRequest.populate([
@@ -224,6 +236,53 @@ const updateStatus = async (req, res, newStatus) => {
 };
 
 // ---------------------------------------------------------------------------
+// GET /api/recovery-requests/unread-count
+// ---------------------------------------------------------------------------
+const getUnreadClaimsCount = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const unreadReceived = await RecoveryRequest.countDocuments({
+      finder: userId,
+      readByFinder: false,
+    });
+    const unreadSent = await RecoveryRequest.countDocuments({
+      claimant: userId,
+      readByClaimant: false,
+    });
+    return res.json({ count: unreadReceived + unreadSent, unreadReceived, unreadSent });
+  } catch (error) {
+    console.error("getUnreadClaimsCount error:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// ---------------------------------------------------------------------------
+// PATCH /api/recovery-requests/mark-read
+// ---------------------------------------------------------------------------
+const markClaimsRead = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { role } = req.body;
+    if (role === "finder" || !role) {
+      await RecoveryRequest.updateMany(
+        { finder: userId, readByFinder: false },
+        { $set: { readByFinder: true } }
+      );
+    }
+    if (role === "claimant" || !role) {
+      await RecoveryRequest.updateMany(
+        { claimant: userId, readByClaimant: false },
+        { $set: { readByClaimant: true } }
+      );
+    }
+    return res.json({ message: "Claims marked as read" });
+  } catch (error) {
+    console.error("markClaimsRead error:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// ---------------------------------------------------------------------------
 // PATCH /api/recovery-requests/:id/accept
 // ---------------------------------------------------------------------------
 const acceptRequest = (req, res) => updateStatus(req, res, "accepted");
@@ -239,4 +298,7 @@ module.exports = {
   getReceivedRequests,
   acceptRequest,
   rejectRequest,
+  getUnreadClaimsCount,
+  markClaimsRead,
 };
+

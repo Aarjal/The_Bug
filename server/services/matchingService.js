@@ -18,17 +18,40 @@ function tokenize(text) {
     .filter((word) => word.length > 1 && !STOP_WORDS.has(word));
 }
 
-// Calculate similarity score between two token arrays (Jaccard-like intersection / union)
+// Calculate similarity score between two token arrays
+// Uses the best of Jaccard (intersection/union) and Containment (intersection/min)
+// so that "laptop" vs "dell laptop" scores high (full containment).
+// Also does substring matching: "lap" partially matches "laptop".
 function calculateSimilarity(tokens1, tokens2) {
   if (tokens1.length === 0 || tokens2.length === 0) return 0;
-  
+
   const set1 = new Set(tokens1);
   const set2 = new Set(tokens2);
-  
-  const intersection = new Set([...set1].filter((x) => set2.has(x)));
+
+  // Count matches including partial/substring matches
+  let matchCount = 0;
+  for (const t1 of set1) {
+    for (const t2 of set2) {
+      if (t1 === t2) {
+        matchCount++;
+        break;
+      }
+      // Partial: one token contains the other (min length 3 to avoid noise)
+      if (t1.length >= 3 && t2.length >= 3 && (t1.includes(t2) || t2.includes(t1))) {
+        matchCount += 0.75;
+        break;
+      }
+    }
+  }
+
   const union = new Set([...set1, ...set2]);
-  
-  return intersection.size / union.size;
+  const minSize = Math.min(set1.size, set2.size);
+
+  const jaccard = matchCount / union.size;
+  const containment = matchCount / minSize; // how much of the smaller set is covered
+
+  // Take the best of both — containment rewards "laptop" ⊂ "dell laptop"
+  return Math.max(jaccard, containment);
 }
 
 // Configurable threshold (between 0 and 100)

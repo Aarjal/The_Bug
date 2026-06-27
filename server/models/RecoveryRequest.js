@@ -28,6 +28,14 @@ const recoveryRequestSchema = new mongoose.Schema(
       maxlength: [500, "Message must be at most 500 characters"],
       default: "",
     },
+    readByFinder: {
+      type: Boolean,
+      default: false,
+    },
+    readByClaimant: {
+      type: Boolean,
+      default: true,
+    },
   },
   { timestamps: true }
 );

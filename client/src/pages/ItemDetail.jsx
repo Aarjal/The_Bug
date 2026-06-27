@@ -4,6 +4,7 @@ import { MapPin, Calendar, Compass, User, Edit2, CheckCircle, Trash2, ArrowLeft,
 import { getItem, deleteItem, resolveItem, getItemMatches, createRecoveryRequest, getSentRecoveryRequests } from "../api/services";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
+import { useNotifications } from "../context/NotificationContext";
 import { formatDate } from "../utils/helpers";
 import ConfirmationModal from "../components/ConfirmationModal";
 import "../styles/DetailAndMyItems.css";
@@ -13,6 +14,7 @@ export default function ItemDetail() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { addToast } = useToast();
+  const { fetchUnreadCount } = useNotifications();
 
   const [item, setItem] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -146,6 +148,7 @@ export default function ItemDetail() {
       setHasSentRequest(true);
       setShowClaimModal(false);
       setClaimMessage("");
+      fetchUnreadCount();
     } catch (err) {
       setClaimError(err.response?.data?.message || "Failed to submit recovery request.");
     } finally {

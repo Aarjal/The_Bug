@@ -119,7 +119,7 @@
 .form-select.invalid,
 .form-textarea.invalid {
   border-color: var(--danger);
-  background: #fff5f5;
+  background: var(--bg-error);
 }
 
 /* --- Actions Panel --- */

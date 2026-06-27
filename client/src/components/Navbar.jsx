@@ -10,14 +10,19 @@ import {
   Menu,
   X,
   FileCheck,
+  Sun,
+  Moon,
+  Monitor,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { useNotifications } from "../context/NotificationContext";
+import { useTheme } from "../context/ThemeContext";
 import "../styles/Layout.css";
 
 export default function Navbar() {
   const { user, logout } = useAuth();
   const { unreadCount, unreadClaimsCount } = useNotifications();
+  const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -72,13 +77,13 @@ export default function Navbar() {
           {user && (
             <>
               <li>
-                <NavLink to="/create?type=lost" className="nav-link">
+                <NavLink to="/create?type=lost" className={({ isActive }) => `nav-link ${isActive && location.search === '?type=lost' ? 'active' : ''}`}>
                   <PlusCircle size={18} />
                   <span>Report Lost</span>
                 </NavLink>
               </li>
               <li>
-                <NavLink to="/create?type=found" className="nav-link">
+                <NavLink to="/create?type=found" className={({ isActive }) => `nav-link ${isActive && location.search === '?type=found' ? 'active' : ''}`}>
                   <PlusCircle size={18} />
                   <span>Report Found</span>
                 </NavLink>
@@ -110,7 +115,7 @@ export default function Navbar() {
                         alignItems: "center",
                         justifyContent: "center",
                         padding: "0 4px",
-                        boxShadow: "0 0 0 2px #fff",
+                        boxShadow: "0 0 0 2px var(--bg-card)",
                         lineHeight: 1
                       }}
                     >
@@ -140,7 +145,7 @@ export default function Navbar() {
                         alignItems: "center",
                         justifycontent: "center",
                         padding: "0 4px",
-                        boxShadow: "0 0 0 2px #fff",
+                        boxShadow: "0 0 0 2px var(--bg-card)",
                         lineHeight: 1
                       }}
                     >
@@ -195,6 +200,32 @@ export default function Navbar() {
                       <span>Admin Dashboard</span>
                     </Link>
                   )}
+                  <div className="dropdown-theme-section">
+                    <span className="dropdown-theme-title">Theme</span>
+                    <div className="theme-options-grid">
+                      <button
+                        onClick={() => setTheme("light")}
+                        className={`theme-btn ${theme === "light" ? "active" : ""}`}
+                      >
+                        <Sun size={14} />
+                        <span>Light</span>
+                      </button>
+                      <button
+                        onClick={() => setTheme("dark")}
+                        className={`theme-btn ${theme === "dark" ? "active" : ""}`}
+                      >
+                        <Moon size={14} />
+                        <span>Dark</span>
+                      </button>
+                      <button
+                        onClick={() => setTheme("system")}
+                        className={`theme-btn ${theme === "system" ? "active" : ""}`}
+                      >
+                        <Monitor size={14} />
+                        <span>System</span>
+                      </button>
+                    </div>
+                  </div>
                   <button onClick={handleLogout} className="dropdown-item dropdown-item-danger">
                     <LogOut size={16} />
                     <span>Log Out</span>
@@ -236,7 +267,7 @@ export default function Navbar() {
                 borderRadius: "50%",
                 width: "8px",
                 height: "8px",
-                boxShadow: "0 0 0 2px #fff",
+                boxShadow: "0 0 0 2px var(--bg-card)",
               }}
             />
           )}
@@ -253,11 +284,11 @@ export default function Navbar() {
 
           {user ? (
             <>
-              <NavLink to="/create?type=lost" className="mobile-nav-link">
+              <NavLink to="/create?type=lost" className={({ isActive }) => `mobile-nav-link ${isActive && location.search === '?type=lost' ? 'active' : ''}`}>
                 <PlusCircle size={18} />
                 <span>Report Lost Item</span>
               </NavLink>
-              <NavLink to="/create?type=found" className="mobile-nav-link">
+              <NavLink to="/create?type=found" className={({ isActive }) => `mobile-nav-link ${isActive && location.search === '?type=found' ? 'active' : ''}`}>
                 <PlusCircle size={18} />
                 <span>Report Found Item</span>
               </NavLink>
@@ -340,6 +371,32 @@ export default function Navbar() {
                     <span>Admin Dashboard</span>
                   </NavLink>
                 )}
+                <div className="dropdown-theme-section mobile-theme-section" style={{ margin: "0.5rem 1rem" }}>
+                  <span className="dropdown-theme-title" style={{ fontSize: "0.8rem", color: "var(--text-secondary)" }}>Theme</span>
+                  <div className="theme-options-grid">
+                    <button
+                      onClick={() => setTheme("light")}
+                      className={`theme-btn ${theme === "light" ? "active" : ""}`}
+                    >
+                      <Sun size={14} />
+                      <span>Light</span>
+                    </button>
+                    <button
+                      onClick={() => setTheme("dark")}
+                      className={`theme-btn ${theme === "dark" ? "active" : ""}`}
+                    >
+                      <Moon size={14} />
+                      <span>Dark</span>
+                    </button>
+                    <button
+                      onClick={() => setTheme("system")}
+                      className={`theme-btn ${theme === "system" ? "active" : ""}`}
+                    >
+                      <Monitor size={14} />
+                      <span>System</span>
+                    </button>
+                  </div>
+                </div>
                 <button
                   onClick={handleLogout}
                   className="dropdown-item dropdown-item-danger"

@@ -207,12 +207,12 @@
 
 .user-card-btn-danger:hover {
   color: var(--danger);
-  background: #fff5f5;
+  background: var(--bg-error);
 }
 
 .user-card-btn-success:hover {
   color: var(--success);
-  background: #f0fff4;
+  background: var(--bg-success);
 }
 
 /* --- Responsive Detail --- */

@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { ThemeProvider } from "./context/ThemeContext";
 import { AuthProvider } from "./context/AuthContext";
 import { NotificationProvider } from "./context/NotificationContext";
 import { ToastProvider } from "./context/ToastContext";
@@ -20,74 +21,76 @@ import RecoveryRequests from "./pages/RecoveryRequests";
 
 export default function App() {
   return (
-    <AuthProvider>
-      <ToastProvider>
-        <NotificationProvider>
-          <BrowserRouter>
-            <Routes>
-              <Route element={<Layout />}>
-                {/* Public routes */}
-                <Route path="/" element={<Feed />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
-                <Route path="/item/:id" element={<ItemDetail />} />
+    <ThemeProvider>
+      <AuthProvider>
+        <ToastProvider>
+          <NotificationProvider>
+            <BrowserRouter>
+              <Routes>
+                <Route element={<Layout />}>
+                  {/* Public routes */}
+                  <Route path="/" element={<Feed />} />
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/register" element={<Register />} />
+                  <Route path="/item/:id" element={<ItemDetail />} />
 
-                {/* Protected routes */}
-                <Route
-                  path="/create"
-                  element={
-                    <ProtectedRoute>
-                      <CreateItem />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/edit/:id"
-                  element={
-                    <ProtectedRoute>
-                      <EditItem />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/my-posts"
-                  element={
-                    <ProtectedRoute>
-                      <MyPosts />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/notifications"
-                  element={
-                    <ProtectedRoute>
-                      <Notifications />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/claims"
-                  element={
-                    <ProtectedRoute>
-                      <RecoveryRequests />
-                    </ProtectedRoute>
-                  }
-                />
+                  {/* Protected routes */}
+                  <Route
+                    path="/create"
+                    element={
+                      <ProtectedRoute>
+                        <CreateItem />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/edit/:id"
+                    element={
+                      <ProtectedRoute>
+                        <EditItem />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/my-posts"
+                    element={
+                      <ProtectedRoute>
+                        <MyPosts />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/notifications"
+                    element={
+                      <ProtectedRoute>
+                        <Notifications />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/claims"
+                    element={
+                      <ProtectedRoute>
+                        <RecoveryRequests />
+                      </ProtectedRoute>
+                    }
+                  />
 
-                {/* Admin routes */}
-                <Route
-                  path="/admin"
-                  element={
-                    <AdminRoute>
-                      <AdminDashboard />
-                    </AdminRoute>
-                  }
-                />
-              </Route>
-            </Routes>
-          </BrowserRouter>
-        </NotificationProvider>
-      </ToastProvider>
-    </AuthProvider>
+                  {/* Admin routes */}
+                  <Route
+                    path="/admin"
+                    element={
+                      <AdminRoute>
+                        <AdminDashboard />
+                      </AdminRoute>
+                    }
+                  />
+                </Route>
+              </Routes>
+            </BrowserRouter>
+          </NotificationProvider>
+        </ToastProvider>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }

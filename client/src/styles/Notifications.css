@@ -37,7 +37,7 @@
 }
 
 .notification-card.unread {
-  background: #f7fafc; /* very light grey-blue */
+  background: var(--bg-unread);
   border-left: 4px solid var(--primary);
 }
 

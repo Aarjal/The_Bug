@@ -92,7 +92,7 @@
 
 .stat-icon--amber {
   background: rgba(236, 201, 75, 0.15);
-  color: #b7791f;
+  color: var(--stat-amber-text);
 }
 
 .stat-icon--red {
@@ -102,12 +102,12 @@
 
 .stat-icon--purple {
   background: rgba(128, 90, 213, 0.1);
-  color: #6b46c1;
+  color: var(--stat-purple-text);
 }
 
 .stat-icon--indigo {
   background: rgba(99, 102, 241, 0.1);
-  color: #4f46e5;
+  color: var(--stat-indigo-text);
 }
 
 /* Stat Text */
@@ -254,8 +254,8 @@
 
 /* Active badge (not in global index.css) */
 .badge-active {
-  background: rgba(56, 178, 172, 0.12);
-  color: #234e52;
+  background: var(--badge-active-bg);
+  color: var(--badge-active-text);
 }
 
 /* --- Loading / Empty States --- */

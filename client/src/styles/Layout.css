@@ -74,12 +74,12 @@
 
 .nav-link:hover {
   color: var(--primary);
-  background: rgba(26, 72, 142, 0.04);
+  background: var(--hover-primary-bg);
 }
 
 .nav-link.active {
   color: var(--primary);
-  background: rgba(26, 72, 142, 0.08);
+  background: var(--hover-primary-bg-strong);
   font-weight: 600;
 }
 
@@ -203,7 +203,61 @@
 
 .dropdown-item-danger:hover {
   color: var(--danger);
-  background: #fff5f5;
+  background: rgba(245, 101, 101, 0.08);
+}
+
+/* --- Theme Selector inside Dropdown --- */
+.dropdown-theme-section {
+  padding: 0.75rem;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  margin: 0.4rem 0;
+}
+
+.dropdown-theme-title {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+}
+
+.theme-options-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.25rem;
+  background: var(--bg-input);
+  padding: 2px;
+  border-radius: var(--radius-sm);
+}
+
+.theme-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.25rem;
+  border: none;
+  background: transparent;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.theme-btn:hover {
+  color: var(--text);
+}
+
+.theme-btn.active {
+  background: var(--bg-card);
+  color: var(--primary);
+  box-shadow: var(--shadow-sm);
+  font-weight: 600;
 }
 
 /* --- Mobile Menu Controls --- */
@@ -260,7 +314,7 @@
 
 .mobile-nav-link.active {
   color: var(--primary);
-  background: rgba(26, 72, 142, 0.08);
+  background: var(--hover-primary-bg-strong);
   font-weight: 600;
 }
 

@@ -5,27 +5,51 @@
 /* --- Google Font --- */
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
 
-/* --- CSS Variables --- */
-:root {
-  /* Brand */
+/* --- CSS Variables Architecture --- */
+:root,
+[data-theme="light"] {
+  /* Brand Tokens */
   --primary: #1a488e;
   --primary-light: #2a5caa;
   --primary-dark: #133668;
+  --primary-hover: #255bb0;
   --accent: #38b2ac;
   --accent-light: #4fd1c5;
   --success: #48bb78;
   --warning: #ecc94b;
   --danger: #f56565;
 
-  /* Neutrals */
+  /* Surfaces & Neutrals */
   --bg: #f7f8fa;
+  --surface: #ffffff;
   --bg-card: #ffffff;
   --bg-input: #f1f3f7;
   --border: #e2e6ee;
   --border-focus: var(--primary);
+
+  /* Typography */
   --text: #1a202c;
   --text-secondary: #64748b;
   --text-muted: #94a3b8;
+
+  /* Semantic Backgrounds */
+  --bg-error: #fff5f5;
+  --bg-success: #f0fff4;
+  --bg-unread: #f7fafc;
+  --text-error: #c53030;
+  --text-success: #276749;
+  --border-error: #fed7d7;
+  --border-success: #c6f6d5;
+  --badge-active-bg: rgba(56, 178, 172, 0.12);
+  --badge-active-text: #234e52;
+  --stat-amber-text: #b7791f;
+  --stat-purple-text: #6b46c1;
+  --stat-indigo-text: #4f46e5;
+  --skeleton-from: #f1f3f7;
+  --skeleton-mid: #e2e6ee;
+  --focus-ring: rgba(26, 72, 142, 0.1);
+  --hover-primary-bg: rgba(26, 72, 142, 0.04);
+  --hover-primary-bg-strong: rgba(26, 72, 142, 0.08);
 
   /* Shadows */
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
@@ -38,11 +62,59 @@
   --radius-lg: 14px;
   --radius-full: 9999px;
 
-  /* Spacing */
+  /* Spacing & Utilities */
   --container-max: 1200px;
-
-  /* Transitions */
   --transition: 0.2s ease;
+}
+
+[data-theme="dark"] {
+  /* Brand Tokens for Dark Mode */
+  --primary: #4f80cf;
+  --primary-light: #6b98e3;
+  --primary-dark: #2a5caa;
+  --primary-hover: #6190df;
+  --accent: #319795;
+  --accent-light: #38b2ac;
+  --success: #38a169;
+  --warning: #d69e2e;
+  --danger: #e53e3e;
+
+  /* Surfaces & Neutrals for Dark Mode */
+  --bg: #0f172a;
+  --surface: #1e293b;
+  --bg-card: #1e293b;
+  --bg-input: #334155;
+  --border: #334155;
+  --border-focus: var(--primary-light);
+
+  /* Typography for Dark Mode */
+  --text: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+
+  /* Semantic Backgrounds for Dark Mode */
+  --bg-error: rgba(229, 62, 62, 0.12);
+  --bg-success: rgba(72, 187, 120, 0.1);
+  --bg-unread: rgba(79, 128, 207, 0.08);
+  --text-error: #fc8181;
+  --text-success: #68d391;
+  --border-error: rgba(229, 62, 62, 0.25);
+  --border-success: rgba(72, 187, 120, 0.25);
+  --badge-active-bg: rgba(56, 178, 172, 0.15);
+  --badge-active-text: #81e6d9;
+  --stat-amber-text: #f6e05e;
+  --stat-purple-text: #b794f4;
+  --stat-indigo-text: #a5b4fc;
+  --skeleton-from: #1e293b;
+  --skeleton-mid: #334155;
+  --focus-ring: rgba(79, 128, 207, 0.2);
+  --hover-primary-bg: rgba(79, 128, 207, 0.08);
+  --hover-primary-bg-strong: rgba(79, 128, 207, 0.15);
+
+  /* Shadows for Dark Mode */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
 }
 
 /* --- Reset & Base --- */
@@ -162,7 +234,7 @@ img {
 
 .btn-outline:hover:not(:disabled) {
   border-color: var(--primary);
-  background: rgba(26, 72, 142, 0.04);
+  background: var(--hover-primary-bg);
 }
 
 .btn-danger {
@@ -232,8 +304,8 @@ img {
 .form-select:focus,
 .form-textarea:focus {
   border-color: var(--border-focus);
-  box-shadow: 0 0 0 3px rgba(26, 72, 142, 0.1);
-  background: #fff;
+  box-shadow: 0 0 0 3px var(--focus-ring);
+  background: var(--bg-card);
 }
 
 .form-input::placeholder,
@@ -256,15 +328,15 @@ img {
 }
 
 .alert-error {
-  background: #fff5f5;
-  color: #c53030;
-  border: 1px solid #fed7d7;
+  background: var(--bg-error);
+  color: var(--text-error);
+  border: 1px solid var(--border-error);
 }
 
 .alert-success {
-  background: #f0fff4;
-  color: #276749;
-  border: 1px solid #c6f6d5;
+  background: var(--bg-success);
+  color: var(--text-success);
+  border: 1px solid var(--border-success);
 }
 
 /* --- Cards --- */
@@ -310,16 +382,16 @@ img {
 }
 
 .badge-lost {
-  background: #fff5f5;
-  color: #c53030;
+  background: var(--bg-error);
+  color: var(--text-error);
 }
 
 .badge-found {
-  background: #f0fff4;
-  color: #276749;
+  background: var(--bg-success);
+  color: var(--text-success);
 }
 
 .badge-resolved {
-  background: #f7fafc;
+  background: var(--bg-input);
   color: var(--text-muted);
 }

@@ -1,10 +1,10 @@
-# 🔍 Lost & Found
+# Lost & Found
 
 A location-based community platform designed to help people recover lost belongings efficiently. This application matches lost and found reports in real-time using title/description keyword similarity (Jaccard and Containment algorithms), location proximity, and timeline validation.
 
 ---
 
-## 🚀 Key Features
+##  Key Features
 
 *   **Real-time Intelligent Matching Engine**: Automatically calculates confidence scores between lost and found items.
 *   **Dual-role Flow**: Report lost items or report found items with pictures, category, location, and date details.
@@ -16,7 +16,7 @@ A location-based community platform designed to help people recover lost belongi
 
 ---
 
-## 🛠 Tech Stack
+## Tech Stack
 
 | Layer | Technologies |
 | :--- | :--- |
@@ -51,7 +51,7 @@ The_Bug/
 
 ---
 
-## 🧠 Matching Engine Logic
+##  Matching Engine Logic
 
 The core feature is the **Confidence Matching Engine** which evaluates newly posted items against opposite-type items (e.g., matching a new "lost" item against existing "found" candidates):
 
@@ -64,7 +64,7 @@ The core feature is the **Confidence Matching Engine** which evaluates newly pos
 
 ---
 
-## 📊 Database Models
+##  Database Models
 
 ### User
 *   `username` (unique, min 3 chars)
@@ -90,7 +90,7 @@ The core feature is the **Confidence Matching Engine** which evaluates newly pos
 
 ---
 
-## 💻 Getting Started
+## 💻Getting Started
 
 ### Prerequisites
 *   Node.js (v18+)
@@ -131,16 +131,7 @@ The core feature is the **Confidence Matching Engine** which evaluates newly pos
     ```
     The application will be accessible at `http://localhost:5173`.
 
----
 
-## 🤝 Contributing
-
-Contributions are welcome! Please follow these guidelines:
-1.  Fork the Project.
-2.  Create your Feature Branch (`git checkout -b feature/AmazingFeature`).
-3.  Commit your Changes (`git commit -m 'Add some AmazingFeature'`).
-4.  Push to the Branch (`git push origin feature/AmazingFeature`).
-5.  Open a Pull Request.
 
 ---
 

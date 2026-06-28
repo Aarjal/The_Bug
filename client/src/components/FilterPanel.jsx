@@ -1,3 +1,5 @@
+import CustomSelect from "./CustomSelect";
+
 export default function FilterPanel({
   type,
   onTypeChange,
@@ -13,6 +15,22 @@ export default function FilterPanel({
   onReset,
   isFiltered,
 }) {
+  const categoryOptions = [
+    { value: "", label: "All Categories" },
+    ...categoriesList,
+  ];
+
+  const statusOptions = [
+    { value: "", label: "All Statuses" },
+    { value: "active", label: "Active Only" },
+    { value: "resolved", label: "Resolved Only" },
+  ];
+
+  const sortOptions = [
+    { value: "newest", label: "Newest First" },
+    { value: "oldest", label: "Oldest First" },
+  ];
+
   return (
     <div className="filters-row">
       <div className="filters-group-left">
@@ -40,42 +58,27 @@ export default function FilterPanel({
 
         {/* Category selection */}
         <div className="filter-select-wrapper">
-          <label htmlFor="feed-category-filter" className="sr-only">
-            Filter by Category
-          </label>
-          <select
+          <CustomSelect
             id="feed-category-filter"
-            className="form-select"
             value={category}
-            onChange={onCategoryChange}
-          >
-            <option value="">All Categories</option>
-            {categoriesList.map((cat) => (
-              <option key={cat.value} value={cat.value}>
-                {cat.label}
-              </option>
-            ))}
-          </select>
+            onChange={(val) => onCategoryChange({ target: { value: val } })}
+            options={categoryOptions}
+            placeholder="All Categories"
+          />
         </div>
 
         {/* Status selection */}
         <div className="filter-select-wrapper">
-          <label htmlFor="feed-status-filter" className="sr-only">
-            Filter by Status
-          </label>
-          <select
+          <CustomSelect
             id="feed-status-filter"
-            className="form-select"
             value={status}
-            onChange={onStatusChange}
-          >
-            <option value="">All Statuses</option>
-            <option value="active">Active Only</option>
-            <option value="resolved">Resolved Only</option>
-          </select>
+            onChange={(val) => onStatusChange({ target: { value: val } })}
+            options={statusOptions}
+            placeholder="All Statuses"
+          />
         </div>
 
-        {/* Location selection */}
+        {/* Location input */}
         <div className="filter-select-wrapper location-input-field">
           <label htmlFor="feed-location-filter" className="sr-only">
             Filter by Location
@@ -92,18 +95,13 @@ export default function FilterPanel({
 
         {/* Sort selection */}
         <div className="filter-select-wrapper">
-          <label htmlFor="feed-sort-filter" className="sr-only">
-            Sort By
-          </label>
-          <select
+          <CustomSelect
             id="feed-sort-filter"
-            className="form-select"
             value={sort}
-            onChange={onSortChange}
-          >
-            <option value="newest">Newest First</option>
-            <option value="oldest">Oldest First</option>
-          </select>
+            onChange={(val) => onSortChange({ target: { value: val } })}
+            options={sortOptions}
+            placeholder="Newest First"
+          />
         </div>
       </div>
 

@@ -133,8 +133,4 @@ The core feature is the **Confidence Matching Engine** which evaluates newly pos
 
 
 
----
 
-## 📄 License
-
-Distributed under the ISC License. See `LICENSE` for details.

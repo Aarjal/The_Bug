@@ -21,6 +21,7 @@ export default function Register() {
     contactValue: "",
   });
   const [showPassword, setShowPassword] = useState(false);
+  const [agreed, setAgreed] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -231,10 +232,23 @@ export default function Register() {
             </div>
           )}
 
+          <div className="form-group checkbox-group" style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem', marginBottom: '1.5rem' }}>
+            <input 
+              type="checkbox" 
+              id="reg-agreed" 
+              checked={agreed}
+              onChange={(e) => setAgreed(e.target.checked)}
+              style={{ marginTop: '0.25rem' }}
+            />
+            <label htmlFor="reg-agreed" style={{ fontSize: '0.9rem', lineHeight: '1.4' }}>
+              I have read and agree to the <Link to="/terms-of-service" target="_blank">Terms of Service</Link>, <Link to="/privacy-policy" target="_blank">Privacy Policy</Link>, and <Link to="/community-guidelines" target="_blank">Community Guidelines</Link>.
+            </label>
+          </div>
+
           <button
             type="submit"
             className="btn btn-primary btn-block auth-submit"
-            disabled={loading}
+            disabled={loading || !agreed}
           >
             {loading ? <span className="spinner" /> : "Create Account"}
           </button>

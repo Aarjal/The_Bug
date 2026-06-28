@@ -215,6 +215,7 @@ img {
 .btn-primary:hover:not(:disabled) {
   background: var(--primary-light);
   box-shadow: var(--shadow-md);
+  color: #fff;
 }
 
 .btn-accent {

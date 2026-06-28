@@ -18,6 +18,9 @@ import MyPosts from "./pages/MyPosts";
 import Notifications from "./pages/Notifications";
 import AdminDashboard from "./pages/AdminDashboard";
 import RecoveryRequests from "./pages/RecoveryRequests";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsOfService from "./pages/TermsOfService";
+import CommunityGuidelines from "./pages/CommunityGuidelines";
 
 export default function App() {
   return (
@@ -33,6 +36,9 @@ export default function App() {
                   <Route path="/login" element={<Login />} />
                   <Route path="/register" element={<Register />} />
                   <Route path="/item/:id" element={<ItemDetail />} />
+                  <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                  <Route path="/terms-of-service" element={<TermsOfService />} />
+                  <Route path="/community-guidelines" element={<CommunityGuidelines />} />
 
                   {/* Protected routes */}
                   <Route

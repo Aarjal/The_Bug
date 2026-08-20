@@ -245,7 +245,8 @@ Resolved items:
 
 # Future Features
 
-Not required for MVP.
+* Location-Based matching
+* AI comparisom
 
 ## Nearby User Notifications
 
@@ -261,19 +262,6 @@ Use AI/ML in the future for image and description similarity.
 
 ---
 
-# Features Removed From Scope
-
-The original User Reports page was intentionally removed.
-
-Reason:
-
-Reduce MVP complexity.
-
-Possible replacement:
-
-Simple "My Posts" page.
-
----
 
 # Admin Dashboard
 

@@ -49,7 +49,6 @@ export default function EditItem() {
     );
   }
 
-  // Double-check ownership: if not user's item, redirect home
   const ownerId = item.userId?._id || item.userId;
   if (ownerId && user?._id && ownerId.toString() !== user._id.toString()) {
     return <Navigate to="/" replace />;
@@ -67,7 +66,6 @@ export default function EditItem() {
           </p>
         </div>
 
-        {/* Form mounted in Edit Mode */}
         <ItemForm type={item.type} itemToEdit={item} />
       </div>
     </div>

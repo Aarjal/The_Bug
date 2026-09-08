@@ -303,6 +303,7 @@ Authentication:
 
 Hosting:
 
-* TBD
+* Frontend - Vercel
+* Backend - Render
 
 ---

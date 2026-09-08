@@ -5,7 +5,6 @@ export default function CreateItem() {
   const [searchParams] = useSearchParams();
   const rawType = searchParams.get("type");
 
-  // Ensure type is valid, fallback to lost
   const type = rawType === "lost" || rawType === "found" ? rawType : "lost";
 
   const isLost = type === "lost";
@@ -24,7 +23,6 @@ export default function CreateItem() {
           </p>
         </div>
 
-        {/* Reusable Item Form */}
         <ItemForm type={type} />
       </div>
     </div>

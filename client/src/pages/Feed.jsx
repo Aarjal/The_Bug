@@ -17,11 +17,8 @@ export default function Feed() {
     hasPreviousPage: false,
   });
 
-  // Raw inputs (need to be debounced)
   const [searchVal, setSearchVal] = useState("");
   const [locationVal, setLocationVal] = useState("");
-
-  // Query Filters State
   const [q, setQ] = useState("");
   const [type, setType] = useState(""); // "" (All), "lost", "found"
   const [category, setCategory] = useState("");
@@ -29,14 +26,10 @@ export default function Feed() {
   const [location, setLocation] = useState("");
   const [sort, setSort] = useState("newest");
   const [page, setPage] = useState(1);
-
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-
-  // Categories list state (initialized with helpers CATEGORIES, dynamically extended if needed)
   const [categoriesList, setCategoriesList] = useState(CATEGORIES);
 
-  // Debounce search input q (350ms delay)
   useEffect(() => {
     const handler = setTimeout(() => {
       setQ(searchVal);
@@ -54,7 +47,6 @@ export default function Feed() {
     return () => clearTimeout(handler);
   }, [locationVal]);
 
-  // Populate categories dynamically from current feed items if available
   useEffect(() => {
     if (items && items.length > 0) {
       const itemCategories = [...new Set(items.map((item) => item.category))].filter(Boolean);
@@ -96,12 +88,10 @@ export default function Feed() {
     }
   };
 
-  // Refetch items when any filter or page changes
   useEffect(() => {
     fetchItems();
   }, [q, type, category, status, location, sort, page]);
 
-  // Check if any filter is currently applied (compared to default state)
   const isFiltered =
     searchVal !== "" ||
     q !== "" ||
@@ -151,7 +141,6 @@ export default function Feed() {
   return (
     <div className="container main-content">
       <div className="feed-layout">
-        {/* Page Header */}
         <div>
           <h1 style={{ fontSize: "1.8rem", fontWeight: 800, marginBottom: "0.25rem", color: "var(--primary)" }}>
             Community Reports Feed
@@ -161,12 +150,9 @@ export default function Feed() {
           </p>
         </div>
 
-        {/* Filters Panel containing Search and Filters */}
         <div className="filter-panel">
-          {/* Search bar row */}
           <SearchBar value={searchVal} onChange={(e) => setSearchVal(e.target.value)} />
 
-          {/* Filters controls row */}
           <FilterPanel
             type={type}
             onTypeChange={handleTypeChange}
@@ -184,7 +170,6 @@ export default function Feed() {
           />
         </div>
 
-        {/* Error Alert */}
         {error && (
           <div className="error-card card" style={{ maxWidth: "480px", margin: "2rem auto", padding: "2rem", textAlign: "center" }}>
             <AlertCircle size={40} style={{ color: "var(--danger)", marginBottom: "1rem" }} />
@@ -201,9 +186,7 @@ export default function Feed() {
           </div>
         )}
 
-        {/* Content Section */}
         {loading ? (
-          // Grid loading skeletons
           <div className="feed-grid">
             {Array.from({ length: 8 }).map((_, idx) => (
               <div key={idx} className="skeleton-card">
@@ -225,7 +208,6 @@ export default function Feed() {
             ))}
           </div>
         ) : items.length > 0 ? (
-          // Item Feed Cards
           <>
             <div className="feed-grid">
               {items.map((item) => (
@@ -233,7 +215,6 @@ export default function Feed() {
               ))}
             </div>
 
-            {/* Pagination Controls */}
             {pagination.totalPages > 1 && (
               <div className="pagination-container">
                 <button

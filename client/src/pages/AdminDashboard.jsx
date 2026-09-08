@@ -46,7 +46,6 @@ export default function AdminDashboard() {
     fetchDashboard();
   }, []);
 
-  // ── Loading State (Modern Dashboard Skeleton) ──────────────────────────────
   if (loading) {
     return (
       <div className="container main-content">
@@ -76,7 +75,6 @@ export default function AdminDashboard() {
     );
   }
 
-  // ── Error State ────────────────────────────────
   if (error) {
     return (
       <div className="container main-content">
@@ -100,7 +98,6 @@ export default function AdminDashboard() {
     );
   }
 
-  // ── Empty State ────────────────────────────────
   if (!data) {
     return (
       <div className="container main-content">
@@ -132,7 +129,6 @@ export default function AdminDashboard() {
         <p>Platform overview and analytics at a glance.</p>
       </div>
 
-      {/* ── Users Section ─────────────────────────── */}
       <div className="admin-section">
         <h2 className="admin-section-title">
           <Users size={18} /> Users
@@ -153,7 +149,6 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* ── Items Section ─────────────────────────── */}
       <div className="admin-section">
         <h2 className="admin-section-title">
           <Layers size={18} /> Items
@@ -186,7 +181,6 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* ── Recovery Requests Section ─────────────── */}
       <div className="admin-section">
         <h2 className="admin-section-title">
           <ClipboardList size={18} /> Recovery Requests
@@ -219,7 +213,6 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* ── Notifications Section ─────────────────── */}
       <div className="admin-section">
         <h2 className="admin-section-title">
           <Bell size={18} /> Notifications
@@ -234,7 +227,6 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* ── Categories Section ────────────────────── */}
       <div className="admin-section">
         <h2 className="admin-section-title">
           <Layers size={18} /> Categories
@@ -242,7 +234,6 @@ export default function AdminDashboard() {
         <CategoryGrid categories={categories} />
       </div>
 
-      {/* ── Recent Activity Section ───────────────── */}
       <div className="admin-section">
         <h2 className="admin-section-title">
           <Activity size={18} /> Recent Activity

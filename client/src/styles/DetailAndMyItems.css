@@ -1,8 +1,3 @@
-/* ========================================
-   Detail & My Items Dashboard Styles
-   ======================================== */
-
-/* --- Item Detail Page --- */
 .detail-layout {
   display: grid;
   grid-template-columns: 1.2fr 1fr;
@@ -103,7 +98,6 @@
   color: var(--text-muted);
 }
 
-/* --- Owner Management Controls Panel --- */
 .owner-actions-panel {
   background: var(--bg);
   border: 1px solid var(--border);
@@ -129,7 +123,6 @@
   flex-wrap: wrap;
 }
 
-/* --- My Posts Dashboard --- */
 .dashboard-layout {
   display: flex;
   flex-direction: column;
@@ -173,7 +166,6 @@
   border-bottom-color: var(--primary);
 }
 
-/* Dashboard Action Cards */
 .user-card-actions {
   display: flex;
   border-top: 1px solid var(--border);
@@ -215,7 +207,6 @@
   background: var(--bg-success);
 }
 
-/* --- Responsive Detail --- */
 @media (max-width: 850px) {
   .detail-layout {
     grid-template-columns: 1fr;
@@ -249,7 +240,6 @@
   }
 }
 
-/* --- Potential Matches Sections --- */
 .matches-section {
   margin-top: 3.5rem;
   border-top: 2px dashed var(--border);
@@ -343,7 +333,6 @@
   color: var(--text-muted);
 }
 
-/* --- Modal Styles --- */
 .modal-overlay {
   position: fixed;
   top: 0;

@@ -1,4 +1,3 @@
-/* --- Confirmation Modal (scoped to avoid conflicts with claim modal) --- */
 .confirm-overlay {
   position: fixed;
   inset: 0;

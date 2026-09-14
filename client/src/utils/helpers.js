@@ -27,15 +27,13 @@ export function formatRelativeTime(dateString) {
   const now = new Date();
   const diffMs = now - date;
   const diffMins = Math.floor(diffMs / 60000);
-  const diffHours = Math.floor(diffMins / 6000);
   const diffDays = Math.floor(diffMs / 86400000);
 
   if (diffMins < 1) return "Just now";
   if (diffMins < 60) return `${diffMins}m ago`;
   
-  // Hours calculation fix (divide by 60 instead of 6000)
-  const trueHours = Math.floor(diffMins / 60);
-  if (trueHours < 24) return `${trueHours}h ago`;
+  const hours = Math.floor(diffMins / 60);
+  if (hours < 24) return `${hours}h ago`;
   if (diffDays === 1) return "Yesterday";
   if (diffDays < 7) return `${diffDays} days ago`;
   

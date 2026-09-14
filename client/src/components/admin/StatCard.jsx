@@ -1,18 +1,16 @@
 import "../../styles/AdminDashboard.css";
 
-/**
- * Reusable statistics card with icon, title, and numeric value.
- * Accepts an optional `color` prop that maps to a CSS modifier class.
- */
 export default function StatCard({ icon: Icon, title, value, color = "blue" }) {
+  const displayValue = value !== undefined && value !== null ? value : "—";
+
   return (
     <div className="stat-card">
       <div className={`stat-icon stat-icon--${color}`}>
-        <Icon size={22} />
+        <Icon size={22} aria-hidden="true" />
       </div>
       <div className="stat-info">
         <span className="stat-title">{title}</span>
-        <span className="stat-value">{value ?? "—"}</span>
+        <span className="stat-value">{displayValue}</span>
       </div>
     </div>
   );

@@ -19,6 +19,74 @@ import { useNotifications } from "../context/NotificationContext";
 import { useTheme } from "../context/ThemeContext";
 import "../styles/Layout.css";
 
+function getAccountInitials(username) {
+  if (!username) return "?";
+  return username.slice(0, 2).toUpperCase();
+}
+
+function NavNotificationBadge({ count, top = "2px", left = "22px" }) {
+  if (!count || count <= 0) return null;
+
+  return (
+    <span
+      style={{
+        position: "absolute",
+        top,
+        left,
+        background: "var(--danger)",
+        color: "#fff",
+        fontSize: "0.65rem",
+        fontWeight: "bold",
+        borderRadius: "50%",
+        minWidth: "16px",
+        height: "16px",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "0 4px",
+        boxShadow: "0 0 0 2px var(--bg-card)",
+        lineHeight: 1,
+      }}
+    >
+      {count}
+    </span>
+  );
+}
+
+function ThemeModeSelector({ currentTheme, onSelectTheme, extraClassName = "" }) {
+  const themeOptions = [
+    { key: "light", label: "Light", Icon: Sun },
+    { key: "dark", label: "Dark", Icon: Moon },
+    { key: "system", label: "System", Icon: Monitor },
+  ];
+
+  return (
+    <div className={`dropdown-theme-section ${extraClassName}`}>
+      <span className="dropdown-theme-title">Theme</span>
+      <div className="theme-options-grid">
+        {themeOptions.map(({ key, label, Icon }) => (
+          <button
+            key={key}
+            type="button"
+            onClick={() => onSelectTheme(key)}
+            className={`theme-btn ${currentTheme === key ? "active" : ""}`}
+          >
+            <Icon size={14} aria-hidden="true" />
+            <span>{label}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function UserAvatarBadge({ user }) {
+  if (user?.profilePicture) {
+    return <img src={user.profilePicture} alt={user.username} />;
+  }
+  return <span className="avatar-fallback">{getAccountInitials(user?.username)}</span>;
+}
+
 export default function Navbar() {
   const { user, logout } = useAuth();
   const { unreadCount, unreadClaimsCount } = useNotifications();
@@ -26,47 +94,45 @@ export default function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const dropdownRef = useRef(null);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const dropdownMenuRef = useRef(null);
 
-  // Close dropdown when clicking outside
   useEffect(() => {
-    function handleClickOutside(event) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setDropdownOpen(false);
+    function handlePointerDownOutside(event) {
+      if (dropdownMenuRef.current && !dropdownMenuRef.current.contains(event.target)) {
+        setIsDropdownOpen(false);
       }
     }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+
+    document.addEventListener("mousedown", handlePointerDownOutside);
+    return () => document.removeEventListener("mousedown", handlePointerDownOutside);
   }, []);
 
-  // Close mobile menu on page transition
-  useEffect(() => {
-    setMobileMenuOpen(false);
-    setDropdownOpen(false);
-  }, [location.pathname]);
+  const [activeRouteKey, setActiveRouteKey] = useState(location.pathname + location.search);
+  const currentRouteKey = location.pathname + location.search;
 
-  const handleLogout = () => {
+  if (activeRouteKey !== currentRouteKey) {
+    setActiveRouteKey(currentRouteKey);
+    setIsMobileMenuOpen(false);
+    setIsDropdownOpen(false);
+  }
+
+  const handleSignOut = () => {
     logout();
     navigate("/login");
   };
 
-  const getInitials = (username) => {
-    if (!username) return "?";
-    return username.slice(0, 2).toUpperCase();
-  };
+  const isLostCreateActive = location.pathname === "/create" && location.search === "?type=lost";
+  const isFoundCreateActive = location.pathname === "/create" && location.search === "?type=found";
 
   return (
     <nav className="navbar">
       <div className="container nav-container">
-        {/* Logo */}
         <Link to="/" className="nav-logo">
           <img src="/logo.png" alt="Lost & Found" className="logo-img" />
-          {/* <span>Lost &amp; Found</span> */}
         </Link>
 
-        {/* Desktop Menu */}
         <ul className="nav-menu">
           <li>
             <NavLink to="/" end className="nav-link">
@@ -74,16 +140,23 @@ export default function Navbar() {
               <span>Browse Feed</span>
             </NavLink>
           </li>
+
           {user && (
             <>
               <li>
-                <NavLink to="/create?type=lost" className={({ isActive }) => `nav-link ${isActive && location.search === '?type=lost' ? 'active' : ''}`}>
+                <NavLink
+                  to="/create?type=lost"
+                  className={`nav-link ${isLostCreateActive ? "active" : ""}`}
+                >
                   <PlusCircle size={18} />
                   <span>Report Lost</span>
                 </NavLink>
               </li>
               <li>
-                <NavLink to="/create?type=found" className={({ isActive }) => `nav-link ${isActive && location.search === '?type=found' ? 'active' : ''}`}>
+                <NavLink
+                  to="/create?type=found"
+                  className={`nav-link ${isFoundCreateActive ? "active" : ""}`}
+                >
                   <PlusCircle size={18} />
                   <span>Report Found</span>
                 </NavLink>
@@ -98,87 +171,36 @@ export default function Navbar() {
                 <NavLink to="/claims" className="nav-link" style={{ position: "relative" }}>
                   <FileCheck size={18} />
                   <span>Claims</span>
-                  {unreadClaimsCount > 0 && (
-                    <span
-                      style={{
-                        position: "absolute",
-                        top: "2px",
-                        left: "22px",
-                        background: "var(--danger)",
-                        color: "#fff",
-                        fontSize: "0.65rem",
-                        fontWeight: "bold",
-                        borderRadius: "50%",
-                        minWidth: "16px",
-                        height: "16px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        padding: "0 4px",
-                        boxShadow: "0 0 0 2px var(--bg-card)",
-                        lineHeight: 1
-                      }}
-                    >
-                      {unreadClaimsCount}
-                    </span>
-                  )}
+                  <NavNotificationBadge count={unreadClaimsCount} />
                 </NavLink>
               </li>
               <li>
                 <NavLink to="/notifications" className="nav-link" style={{ position: "relative" }}>
                   <Bell size={18} />
                   <span>Notifications</span>
-                  {unreadCount > 0 && (
-                    <span
-                      style={{
-                        position: "absolute",
-                        top: "2px",
-                        left: "22px",
-                        background: "var(--danger)",
-                        color: "#fff",
-                        fontSize: "0.65rem",
-                        fontWeight: "bold",
-                        borderRadius: "50%",
-                        minWidth: "16px",
-                        height: "16px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifycontent: "center",
-                        padding: "0 4px",
-                        boxShadow: "0 0 0 2px var(--bg-card)",
-                        lineHeight: 1
-                      }}
-                    >
-                      {unreadCount}
-                    </span>
-                  )}
+                  <NavNotificationBadge count={unreadCount} />
                 </NavLink>
               </li>
             </>
           )}
         </ul>
 
-        {/* Desktop Actions */}
         <div className="nav-actions">
           {user ? (
-            <div className="profile-menu-container" ref={dropdownRef}>
+            <div className="profile-menu-container" ref={dropdownMenuRef}>
               <button
                 className="profile-btn"
-                onClick={() => setDropdownOpen(!dropdownOpen)}
-                aria-expanded={dropdownOpen}
+                onClick={() => setIsDropdownOpen((prev) => !prev)}
+                aria-expanded={isDropdownOpen}
                 aria-haspopup="true"
                 aria-label="User profile menu"
               >
                 <div className="avatar">
-                  {user.profilePicture ? (
-                    <img src={user.profilePicture} alt={user.username} />
-                  ) : (
-                    <span className="avatar-fallback">{getInitials(user.username)}</span>
-                  )}
+                  <UserAvatarBadge user={user} />
                 </div>
               </button>
 
-              {dropdownOpen && (
+              {isDropdownOpen && (
                 <div className="profile-dropdown">
                   <div className="dropdown-header">
                     <div className="dropdown-user-info">
@@ -194,39 +216,17 @@ export default function Navbar() {
                       )}
                     </div>
                   </div>
+
                   {user.role === "admin" && (
                     <Link to="/admin" className="dropdown-item">
                       <User size={16} />
                       <span>Admin Dashboard</span>
                     </Link>
                   )}
-                  <div className="dropdown-theme-section">
-                    <span className="dropdown-theme-title">Theme</span>
-                    <div className="theme-options-grid">
-                      <button
-                        onClick={() => setTheme("light")}
-                        className={`theme-btn ${theme === "light" ? "active" : ""}`}
-                      >
-                        <Sun size={14} />
-                        <span>Light</span>
-                      </button>
-                      <button
-                        onClick={() => setTheme("dark")}
-                        className={`theme-btn ${theme === "dark" ? "active" : ""}`}
-                      >
-                        <Moon size={14} />
-                        <span>Dark</span>
-                      </button>
-                      <button
-                        onClick={() => setTheme("system")}
-                        className={`theme-btn ${theme === "system" ? "active" : ""}`}
-                      >
-                        <Monitor size={14} />
-                        <span>System</span>
-                      </button>
-                    </div>
-                  </div>
-                  <button onClick={handleLogout} className="dropdown-item dropdown-item-danger">
+
+                  <ThemeModeSelector currentTheme={theme} onSelectTheme={setTheme} />
+
+                  <button onClick={handleSignOut} className="dropdown-item dropdown-item-danger">
                     <LogOut size={16} />
                     <span>Log Out</span>
                   </button>
@@ -245,16 +245,15 @@ export default function Navbar() {
           )}
         </div>
 
-        {/* Mobile Menu Toggle */}
         <button
           className="mobile-toggle"
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          aria-expanded={mobileMenuOpen}
-          aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+          onClick={() => setIsMobileMenuOpen((prev) => !prev)}
+          aria-expanded={isMobileMenuOpen}
+          aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
           style={{ position: "relative" }}
         >
-          {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          {!mobileMenuOpen && (unreadCount > 0 || unreadClaimsCount > 0) && (
+          {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          {!isMobileMenuOpen && (unreadCount > 0 || unreadClaimsCount > 0) && (
             <span
               style={{
                 position: "absolute",
@@ -274,9 +273,11 @@ export default function Navbar() {
         </button>
       </div>
 
-      {/* Mobile Drawer Menu Overlay */}
-      <div className={`mobile-nav ${mobileMenuOpen ? "open" : ""}`} onClick={() => setMobileMenuOpen(false)}>
-        <div className="mobile-menu-content" onClick={(e) => e.stopPropagation()}>
+      <div
+        className={`mobile-nav ${isMobileMenuOpen ? "open" : ""}`}
+        onClick={() => setIsMobileMenuOpen(false)}
+      >
+        <div className="mobile-menu-content" onClick={(event) => event.stopPropagation()}>
           <NavLink to="/" end className="mobile-nav-link">
             <Search size={18} />
             <span>Browse Feed</span>
@@ -284,11 +285,17 @@ export default function Navbar() {
 
           {user ? (
             <>
-              <NavLink to="/create?type=lost" className={({ isActive }) => `mobile-nav-link ${isActive && location.search === '?type=lost' ? 'active' : ''}`}>
+              <NavLink
+                to="/create?type=lost"
+                className={`mobile-nav-link ${isLostCreateActive ? "active" : ""}`}
+              >
                 <PlusCircle size={18} />
                 <span>Report Lost Item</span>
               </NavLink>
-              <NavLink to="/create?type=found" className={({ isActive }) => `mobile-nav-link ${isActive && location.search === '?type=found' ? 'active' : ''}`}>
+              <NavLink
+                to="/create?type=found"
+                className={`mobile-nav-link ${isFoundCreateActive ? "active" : ""}`}
+              >
                 <PlusCircle size={18} />
                 <span>Report Found Item</span>
               </NavLink>
@@ -299,106 +306,40 @@ export default function Navbar() {
               <NavLink to="/claims" className="mobile-nav-link" style={{ position: "relative" }}>
                 <FileCheck size={18} />
                 <span>Claims</span>
-                {unreadClaimsCount > 0 && (
-                  <span
-                    style={{
-                      position: "absolute",
-                      top: "10px",
-                      left: "24px",
-                      background: "var(--danger)",
-                      color: "#fff",
-                      fontSize: "0.62rem",
-                      fontWeight: "bold",
-                      borderRadius: "50%",
-                      minWidth: "15px",
-                      height: "15px",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      padding: "0 3px",
-                      lineHeight: 1
-                    }}
-                  >
-                    {unreadClaimsCount}
-                  </span>
-                )}
+                <NavNotificationBadge count={unreadClaimsCount} top="10px" left="24px" />
               </NavLink>
               <NavLink to="/notifications" className="mobile-nav-link" style={{ position: "relative" }}>
                 <Bell size={18} />
                 <span>Notifications</span>
-                {unreadCount > 0 && (
-                  <span
-                    style={{
-                      position: "absolute",
-                      top: "10px",
-                      left: "24px",
-                      background: "var(--danger)",
-                      color: "#fff",
-                      fontSize: "0.62rem",
-                      fontWeight: "bold",
-                      borderRadius: "50%",
-                      minWidth: "15px",
-                      height: "15px",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      padding: "0 3px",
-                      lineHeight: 1
-                    }}
-                  >
-                    {unreadCount}
-                  </span>
-                )}
+                <NavNotificationBadge count={unreadCount} top="10px" left="24px" />
               </NavLink>
 
               <div className="mobile-nav-user">
                 <div className="mobile-user-card">
                   <div className="avatar">
-                    {user.profilePicture ? (
-                      <img src={user.profilePicture} alt={user.username} />
-                    ) : (
-                      <span className="avatar-fallback">{getInitials(user.username)}</span>
-                    )}
+                    <UserAvatarBadge user={user} />
                   </div>
                   <div className="mobile-user-details">
                     <span className="mobile-username">{user.username}</span>
                     <span className="mobile-email">{user.email}</span>
                   </div>
                 </div>
+
                 {user.role === "admin" && (
                   <NavLink to="/admin" className="mobile-nav-link">
                     <User size={18} />
                     <span>Admin Dashboard</span>
                   </NavLink>
                 )}
-                <div className="dropdown-theme-section mobile-theme-section" style={{ margin: "0.5rem 1rem" }}>
-                  <span className="dropdown-theme-title" style={{ fontSize: "0.8rem", color: "var(--text-secondary)" }}>Theme</span>
-                  <div className="theme-options-grid">
-                    <button
-                      onClick={() => setTheme("light")}
-                      className={`theme-btn ${theme === "light" ? "active" : ""}`}
-                    >
-                      <Sun size={14} />
-                      <span>Light</span>
-                    </button>
-                    <button
-                      onClick={() => setTheme("dark")}
-                      className={`theme-btn ${theme === "dark" ? "active" : ""}`}
-                    >
-                      <Moon size={14} />
-                      <span>Dark</span>
-                    </button>
-                    <button
-                      onClick={() => setTheme("system")}
-                      className={`theme-btn ${theme === "system" ? "active" : ""}`}
-                    >
-                      <Monitor size={14} />
-                      <span>System</span>
-                    </button>
-                  </div>
-                </div>
+
+                <ThemeModeSelector
+                  currentTheme={theme}
+                  onSelectTheme={setTheme}
+                  extraClassName="mobile-theme-section"
+                />
+
                 <button
-                  onClick={handleLogout}
+                  onClick={handleSignOut}
                   className="dropdown-item dropdown-item-danger"
                   style={{ borderRadius: "var(--radius-sm)", padding: "0.75rem 1rem" }}
                 >
@@ -408,7 +349,16 @@ export default function Navbar() {
               </div>
             </>
           ) : (
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", borderTop: "1px solid var(--border)", paddingTop: "1rem", marginTop: "0.5rem" }}>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "0.5rem",
+                borderTop: "1px solid var(--border)",
+                paddingTop: "1rem",
+                marginTop: "0.5rem",
+              }}
+            >
               <Link to="/login" className="btn btn-outline btn-block">
                 Sign In
               </Link>

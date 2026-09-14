@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { SearchX, Inbox, RefreshCw, ChevronLeft, ChevronRight, AlertCircle } from "lucide-react";
 import { getFeed } from "../api/services";
 import { CATEGORIES } from "../utils/helpers";
@@ -6,6 +6,122 @@ import ItemCard from "../components/ItemCard";
 import SearchBar from "../components/SearchBar";
 import FilterPanel from "../components/FilterPanel";
 import "../styles/Feed.css";
+
+function FeedHeroHeader() {
+  return (
+    <div>
+      <h1 style={{ fontSize: "1.8rem", fontWeight: 800, marginBottom: "0.25rem", color: "var(--primary)" }}>
+        Community Reports Feed
+      </h1>
+      <p style={{ color: "var(--text-secondary)", fontSize: "0.95rem" }}>
+        Browse through lost and found listings reported by the community.
+      </p>
+    </div>
+  );
+}
+
+function FeedSkeletonGrid() {
+  return (
+    <div className="feed-grid">
+      {Array.from({ length: 8 }).map((_, idx) => (
+        <div key={idx} className="skeleton-card">
+          <div className="skeleton-image" />
+          <div className="skeleton-body">
+            <div className="skeleton-line skeleton-meta" />
+            <div className="skeleton-line skeleton-title" />
+            <div className="skeleton-line skeleton-desc" />
+            <div className="skeleton-line skeleton-desc" style={{ width: "60%" }} />
+          </div>
+          <div className="skeleton-footer">
+            <div className="skeleton-user">
+              <div className="skeleton-avatar" />
+              <div className="skeleton-line skeleton-name" />
+            </div>
+            <div className="skeleton-line skeleton-btn" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function FeedPaginationControls({ pagination, onPageChange }) {
+  if (!pagination || pagination.totalPages <= 1) return null;
+
+  return (
+    <div className="pagination-container">
+      <button
+        type="button"
+        className="btn btn-outline"
+        disabled={!pagination.hasPreviousPage}
+        onClick={() => onPageChange(pagination.currentPage - 1)}
+        aria-label="Previous Page"
+      >
+        <ChevronLeft size={18} />
+      </button>
+      <span className="pagination-info">
+        Page {pagination.currentPage} of {pagination.totalPages}
+      </span>
+      <button
+        type="button"
+        className="btn btn-outline"
+        disabled={!pagination.hasNextPage}
+        onClick={() => onPageChange(pagination.currentPage + 1)}
+        aria-label="Next Page"
+      >
+        <ChevronRight size={18} />
+      </button>
+    </div>
+  );
+}
+
+function FeedEmptyState({ isFiltered, onResetFilters }) {
+  return (
+    <div className="empty-state">
+      <div className="empty-state-icon">
+        {isFiltered ? <SearchX size={32} /> : <Inbox size={32} />}
+      </div>
+      <h3>No reports found</h3>
+      <p>
+        {isFiltered
+          ? "No items match your search filters."
+          : "No lost or found items have been posted yet."}
+      </p>
+      {isFiltered && (
+        <button
+          type="button"
+          onClick={onResetFilters}
+          className="btn btn-primary"
+          style={{ padding: "0.55rem 1.25rem" }}
+        >
+          Clear Filters
+        </button>
+      )}
+    </div>
+  );
+}
+
+function FeedErrorCard({ message, onRetry }) {
+  return (
+    <div
+      className="error-card card"
+      style={{ maxWidth: "480px", margin: "2rem auto", padding: "2rem", textAlign: "center" }}
+    >
+      <AlertCircle size={40} style={{ color: "var(--danger)", marginBottom: "1rem" }} />
+      <h3 style={{ marginBottom: "0.5rem" }}>Failed to load feed</h3>
+      <p style={{ color: "var(--text-secondary)", marginBottom: "1.5rem" }}>{message}</p>
+      <button
+        type="button"
+        onClick={onRetry}
+        className="btn btn-primary"
+        style={{ display: "inline-flex", margin: "0 auto", gap: "0.5rem" }}
+      >
+        <RefreshCw size={16} />
+        <span>Retry</span>
+      </button>
+    </div>
+  );
+}
 
 export default function Feed() {
   const [items, setItems] = useState([]);
@@ -17,196 +133,183 @@ export default function Feed() {
     hasPreviousPage: false,
   });
 
-  const [searchVal, setSearchVal] = useState("");
-  const [locationVal, setLocationVal] = useState("");
-  const [q, setQ] = useState("");
-  const [type, setType] = useState(""); // "" (All), "lost", "found"
+  const [searchInput, setSearchInput] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  const [locationInput, setLocationInput] = useState("");
+  const [debouncedLocation, setDebouncedLocation] = useState("");
+
+  const [itemType, setItemType] = useState("");
   const [category, setCategory] = useState("");
-  const [status, setStatus] = useState("active"); // default active-first
-  const [location, setLocation] = useState("");
-  const [sort, setSort] = useState("newest");
-  const [page, setPage] = useState(1);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [categoriesList, setCategoriesList] = useState(CATEGORIES);
+  const [itemStatus, setItemStatus] = useState("active");
+  const [sortBy, setSortBy] = useState("newest");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [refreshIndex, setRefreshIndex] = useState(0);
+
+  const [isLoading, setIsLoading] = useState(true);
+  const [feedError, setFeedError] = useState("");
 
   useEffect(() => {
-    const handler = setTimeout(() => {
-      setQ(searchVal);
-      setPage(1);
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchInput);
+      setCurrentPage(1);
     }, 350);
-    return () => clearTimeout(handler);
-  }, [searchVal]);
+    return () => clearTimeout(timer);
+  }, [searchInput]);
 
-  // Debounce location input (350ms delay)
   useEffect(() => {
-    const handler = setTimeout(() => {
-      setLocation(locationVal);
-      setPage(1);
+    const timer = setTimeout(() => {
+      setDebouncedLocation(locationInput);
+      setCurrentPage(1);
     }, 350);
-    return () => clearTimeout(handler);
-  }, [locationVal]);
+    return () => clearTimeout(timer);
+  }, [locationInput]);
 
-  useEffect(() => {
-    if (items && items.length > 0) {
-      const itemCategories = [...new Set(items.map((item) => item.category))].filter(Boolean);
-      const updatedList = [...CATEGORIES];
-      itemCategories.forEach((catVal) => {
-        if (!updatedList.some((c) => c.value === catVal)) {
-          updatedList.push({
-            value: catVal,
-            label: catVal.charAt(0).toUpperCase() + catVal.slice(1),
-          });
-        }
-      });
-      setCategoriesList(updatedList);
-    }
+  const dynamicCategories = useMemo(() => {
+    if (!items || items.length === 0) return CATEGORIES;
+
+    const baseValues = new Set(CATEGORIES.map((c) => c.value));
+    const newlyDiscovered = [];
+
+    items.forEach((item) => {
+      if (item.category && !baseValues.has(item.category)) {
+        baseValues.add(item.category);
+        newlyDiscovered.push({
+          value: item.category,
+          label: item.category.charAt(0).toUpperCase() + item.category.slice(1),
+        });
+      }
+    });
+
+    return newlyDiscovered.length > 0 ? [...CATEGORIES, ...newlyDiscovered] : CATEGORIES;
   }, [items]);
 
-  const fetchItems = async () => {
-    setLoading(true);
-    setError("");
-    try {
-      const params = {
-        page,
-        limit: 12,
-        q: q || undefined,
-        type: type || undefined,
-        category: category || undefined,
-        status: status || undefined,
-        location: location || undefined,
-        sort: sort || undefined,
-      };
-
-      const { data } = await getFeed(params);
-      setItems(data.items);
-      setPagination(data.pagination);
-    } catch (err) {
-      setError("Failed to fetch lost & found feed. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    fetchItems();
-  }, [q, type, category, status, location, sort, page]);
+    let isMounted = true;
+
+    async function fetchFeedItems() {
+      try {
+        const { data } = await getFeed({
+          page: currentPage,
+          limit: 12,
+          q: debouncedSearch || undefined,
+          type: itemType || undefined,
+          category: category || undefined,
+          status: itemStatus || undefined,
+          location: debouncedLocation || undefined,
+          sort: sortBy || undefined,
+        });
+
+        if (isMounted) {
+          setItems(data.items);
+          setPagination(data.pagination);
+          setFeedError("");
+          setIsLoading(false);
+        }
+      } catch {
+        if (isMounted) {
+          setFeedError("Failed to fetch lost & found feed. Please try again.");
+          setIsLoading(false);
+        }
+      }
+    }
+
+    fetchFeedItems();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [currentPage, debouncedSearch, itemType, category, itemStatus, debouncedLocation, sortBy, refreshIndex]);
 
   const isFiltered =
-    searchVal !== "" ||
-    q !== "" ||
-    type !== "" ||
-    category !== "" ||
-    status !== "active" ||
-    locationVal !== "" ||
-    location !== "" ||
-    sort !== "newest";
+    Boolean(searchInput) ||
+    Boolean(debouncedSearch) ||
+    Boolean(itemType) ||
+    Boolean(category) ||
+    itemStatus !== "active" ||
+    Boolean(locationInput) ||
+    Boolean(debouncedLocation) ||
+    sortBy !== "newest";
 
-  const handleTypeChange = (newType) => {
-    setType(newType);
-    setPage(1);
-  };
-
-  const handleCategoryChange = (e) => {
-    setCategory(e.target.value);
-    setPage(1);
-  };
-
-  const handleStatusChange = (e) => {
-    setStatus(e.target.value);
-    setPage(1);
-  };
-
-  const handleLocationChange = (e) => {
-    setLocationVal(e.target.value);
-  };
-
-  const handleSortChange = (e) => {
-    setSort(e.target.value);
-    setPage(1);
-  };
-
-  const resetFilters = () => {
-    setSearchVal("");
-    setQ("");
-    setType("");
+  const handleResetFilters = () => {
+    setSearchInput("");
+    setDebouncedSearch("");
+    setLocationInput("");
+    setDebouncedLocation("");
+    setItemType("");
     setCategory("");
-    setStatus("active");
-    setLocationVal("");
-    setLocation("");
-    setSort("newest");
-    setPage(1);
+    setItemStatus("active");
+    setSortBy("newest");
+    setCurrentPage(1);
+    setIsLoading(true);
+  };
+
+  const handleTypeSelect = (selectedType) => {
+    setItemType(selectedType);
+    setCurrentPage(1);
+    setIsLoading(true);
+  };
+
+  const handleCategorySelect = (selectedCategory) => {
+    const value = selectedCategory?.target ? selectedCategory.target.value : selectedCategory;
+    setCategory(value);
+    setCurrentPage(1);
+    setIsLoading(true);
+  };
+
+  const handleStatusSelect = (selectedStatus) => {
+    const value = selectedStatus?.target ? selectedStatus.target.value : selectedStatus;
+    setItemStatus(value);
+    setCurrentPage(1);
+    setIsLoading(true);
+  };
+
+  const handleSortSelect = (selectedSort) => {
+    const value = selectedSort?.target ? selectedSort.target.value : selectedSort;
+    setSortBy(value);
+    setCurrentPage(1);
+    setIsLoading(true);
+  };
+
+  const handleRetry = () => {
+    setIsLoading(true);
+    setRefreshIndex((prev) => prev + 1);
   };
 
   return (
     <div className="container main-content">
       <div className="feed-layout">
-        <div>
-          <h1 style={{ fontSize: "1.8rem", fontWeight: 800, marginBottom: "0.25rem", color: "var(--primary)" }}>
-            Community Reports Feed
-          </h1>
-          <p style={{ color: "var(--text-secondary)", fontSize: "0.95rem" }}>
-            Browse through lost and found listings reported by the community.
-          </p>
-        </div>
+        <FeedHeroHeader />
 
         <div className="filter-panel">
-          <SearchBar value={searchVal} onChange={(e) => setSearchVal(e.target.value)} />
+          <SearchBar
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+          />
 
           <FilterPanel
-            type={type}
-            onTypeChange={handleTypeChange}
+            type={itemType}
+            onTypeChange={handleTypeSelect}
             category={category}
-            onCategoryChange={handleCategoryChange}
-            categoriesList={categoriesList}
-            status={status}
-            onStatusChange={handleStatusChange}
-            location={locationVal}
-            onLocationChange={handleLocationChange}
-            sort={sort}
-            onSortChange={handleSortChange}
-            onReset={resetFilters}
+            onCategoryChange={handleCategorySelect}
+            categoriesList={dynamicCategories}
+            status={itemStatus}
+            onStatusChange={handleStatusSelect}
+            location={locationInput}
+            onLocationChange={(e) => setLocationInput(e.target.value)}
+            sort={sortBy}
+            onSortChange={handleSortSelect}
+            onReset={handleResetFilters}
             isFiltered={isFiltered}
           />
         </div>
 
-        {error && (
-          <div className="error-card card" style={{ maxWidth: "480px", margin: "2rem auto", padding: "2rem", textAlign: "center" }}>
-            <AlertCircle size={40} style={{ color: "var(--danger)", marginBottom: "1rem" }} />
-            <h3 style={{ marginBottom: "0.5rem" }}>Failed to load feed</h3>
-            <p style={{ color: "var(--text-secondary)", marginBottom: "1.5rem" }}>{error}</p>
-            <button
-              onClick={fetchItems}
-              className="btn btn-primary"
-              style={{ display: "inline-flex", margin: "0 auto", gap: "0.5rem" }}
-            >
-              <RefreshCw size={16} />
-              <span>Retry</span>
-            </button>
-          </div>
+        {feedError && (
+          <FeedErrorCard message={feedError} onRetry={handleRetry} />
         )}
 
-        {loading ? (
-          <div className="feed-grid">
-            {Array.from({ length: 8 }).map((_, idx) => (
-              <div key={idx} className="skeleton-card">
-                <div className="skeleton-image" />
-                <div className="skeleton-body">
-                  <div className="skeleton-line skeleton-meta" />
-                  <div className="skeleton-line skeleton-title" />
-                  <div className="skeleton-line skeleton-desc" />
-                  <div className="skeleton-line skeleton-desc" style={{ width: "60%" }} />
-                </div>
-                <div className="skeleton-footer">
-                  <div className="skeleton-user">
-                    <div className="skeleton-avatar" />
-                    <div className="skeleton-line skeleton-name" />
-                  </div>
-                  <div className="skeleton-line skeleton-btn" />
-                </div>
-              </div>
-            ))}
-          </div>
+        {isLoading ? (
+          <FeedSkeletonGrid />
         ) : items.length > 0 ? (
           <>
             <div className="feed-grid">
@@ -215,51 +318,18 @@ export default function Feed() {
               ))}
             </div>
 
-            {pagination.totalPages > 1 && (
-              <div className="pagination-container">
-                <button
-                  className="btn btn-outline"
-                  disabled={!pagination.hasPreviousPage}
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
-                  aria-label="Previous Page"
-                >
-                  <ChevronLeft size={18} />
-                </button>
-                <span className="pagination-info">
-                  Page {pagination.currentPage} of {pagination.totalPages}
-                </span>
-                <button
-                  className="btn btn-outline"
-                  disabled={!pagination.hasNextPage}
-                  onClick={() => setPage((p) => p + 1)}
-                  aria-label="Next Page"
-                >
-                  <ChevronRight size={18} />
-                </button>
-              </div>
-            )}
+            <FeedPaginationControls
+              pagination={pagination}
+              onPageChange={(nextPage) => {
+                setIsLoading(true);
+                setCurrentPage(Math.max(1, nextPage));
+              }}
+            />
           </>
         ) : (
-          // Empty State
-          <div className="empty-state">
-            <div className="empty-state-icon">
-              {isFiltered ? <SearchX size={32} /> : <Inbox size={32} />}
-            </div>
-            <h3>No reports found</h3>
-            <p>
-              {isFiltered
-                ? "No items match your search."
-                : "No lost or found items have been posted yet."}
-            </p>
-            {isFiltered && (
-              <button onClick={resetFilters} className="btn btn-primary" style={{ padding: "0.55rem 1.25rem" }}>
-                Clear Filters
-              </button>
-            )}
-          </div>
+          <FeedEmptyState isFiltered={isFiltered} onResetFilters={handleResetFilters} />
         )}
       </div>
     </div>
   );
 }
-

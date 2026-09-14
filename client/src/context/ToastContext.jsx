@@ -4,53 +4,63 @@ import "../styles/Toast.css";
 
 const ToastContext = createContext();
 
+function ToastItem({ toast, onDismiss }) {
+  const IconComponent =
+    toast.type === "success"
+      ? CheckCircle
+      : toast.type === "error"
+      ? AlertTriangle
+      : Info;
+
+  return (
+    <div className={`toast toast-${toast.type}`}>
+      <span className={`toast-icon toast-icon-${toast.type}`}>
+        <IconComponent size={18} />
+      </span>
+      <span style={{ flex: 1, paddingRight: "0.5rem" }}>{toast.message}</span>
+      <button
+        className="toast-close-btn"
+        onClick={() => onDismiss(toast.id)}
+        aria-label="Close notification"
+      >
+        <X size={14} />
+      </button>
+    </div>
+  );
+}
+
 export function ToastProvider({ children }) {
   const [toasts, setToasts] = useState([]);
 
   const addToast = useCallback((message, type = "success") => {
-    const id = Date.now();
-    setToasts((prev) => [...prev, { id, message, type }]);
+    const toastId = Date.now() + Math.random().toString(36).slice(2, 6);
+    setToasts((activeToasts) => [...activeToasts, { id: toastId, message, type }]);
 
     setTimeout(() => {
-      setToasts((prev) => prev.filter((t) => t.id !== id));
+      setToasts((activeToasts) => activeToasts.filter((item) => item.id !== toastId));
     }, 4000);
   }, []);
 
-  const removeToast = useCallback((id) => {
-    setToasts((prev) => prev.filter((t) => t.id !== id));
+  const removeToast = useCallback((targetToastId) => {
+    setToasts((activeToasts) => activeToasts.filter((item) => item.id !== targetToastId));
   }, []);
 
   return (
     <ToastContext.Provider value={{ addToast, removeToast }}>
       {children}
-      {/* Toast Overlay Container */}
       <div className="toast-container">
-        {toasts.map((toast) => {
-          let Icon = Info;
-          if (toast.type === "success") Icon = CheckCircle;
-          if (toast.type === "error") Icon = AlertTriangle;
-
-          return (
-            <div key={toast.id} className={`toast toast-${toast.type}`}>
-              <span className={`toast-icon toast-icon-${toast.type}`}>
-                <Icon size={18} />
-              </span>
-              <span style={{ flex: 1, paddingRight: "0.5rem" }}>{toast.message}</span>
-              <button
-                className="toast-close-btn"
-                onClick={() => removeToast(toast.id)}
-                aria-label="Close toast notification"
-              >
-                <X size={14} />
-              </button>
-            </div>
-          );
-        })}
+        {toasts.map((toast) => (
+          <ToastItem key={toast.id} toast={toast} onDismiss={removeToast} />
+        ))}
       </div>
     </ToastContext.Provider>
   );
 }
 
 export function useToast() {
-  return useContext(ToastContext);
+  const context = useContext(ToastContext);
+  if (!context) {
+    throw new Error("useToast must be used within a ToastProvider");
+  }
+  return context;
 }

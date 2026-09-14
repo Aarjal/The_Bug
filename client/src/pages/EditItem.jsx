@@ -5,6 +5,31 @@ import { getItem } from "../api/services";
 import { useAuth } from "../context/AuthContext";
 import ItemForm from "../components/ItemForm";
 
+function EditItemSkeleton() {
+  return (
+    <div className="container main-content" style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "50vh" }}>
+      <div className="spinner spinner-dark" style={{ width: "2.5rem", height: "2.5rem" }} />
+    </div>
+  );
+}
+
+function EditItemErrorCard({ errorMessage, onNavigateHome }) {
+  return (
+    <div className="container main-content" style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "40vh" }}>
+      <div className="error-card card" style={{ maxWidth: "480px", padding: "2rem", textAlign: "center" }}>
+        <AlertCircle size={40} style={{ color: "var(--danger)", marginBottom: "1rem" }} aria-hidden="true" />
+        <h3 style={{ marginBottom: "0.5rem" }}>Failed to load item</h3>
+        <p style={{ color: "var(--text-secondary)", marginBottom: "1.5rem" }}>
+          {errorMessage || "Item not found or has been deleted."}
+        </p>
+        <button onClick={onNavigateHome} className="btn btn-primary">
+          Go to Home Feed
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function EditItem() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -12,45 +37,51 @@ export default function EditItem() {
 
   const [item, setItem] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
-    const fetchItem = async () => {
+    let isCancelled = false;
+
+    async function loadItemForEdit() {
       try {
         const { data } = await getItem(id);
-        setItem(data);
-      } catch (err) {
-        setError("Failed to load item information.");
+        if (!isCancelled) {
+          setItem(data);
+        }
+      } catch {
+        if (!isCancelled) {
+          setErrorMessage("Failed to load item information.");
+        }
       } finally {
-        setLoading(false);
+        if (!isCancelled) {
+          setLoading(false);
+        }
       }
+    }
+
+    loadItemForEdit();
+    return () => {
+      isCancelled = true;
     };
-    fetchItem();
   }, [id]);
 
   if (loading) {
+    return <EditItemSkeleton />;
+  }
+
+  if (errorMessage || !item) {
     return (
-      <div className="container main-content" style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "50vh" }}>
-        <div className="spinner spinner-dark" style={{ width: "2.5rem", height: "2.5rem" }} />
-      </div>
+      <EditItemErrorCard
+        errorMessage={errorMessage}
+        onNavigateHome={() => navigate("/")}
+      />
     );
   }
 
-  if (error || !item) {
-    return (
-      <div className="container main-content" style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "40vh" }}>
-        <div className="error-card card" style={{ maxWidth: "480px", padding: "2rem", textAlign: "center" }}>
-          <AlertCircle size={40} style={{ color: "var(--danger)", marginBottom: "1rem" }} />
-          <h3 style={{ marginBottom: "0.5rem" }}>Failed to load item</h3>
-          <p style={{ color: "var(--text-secondary)", marginBottom: "1.5rem" }}>{error || "Item not found or has been deleted."}</p>
-          <button onClick={() => navigate("/")} className="btn btn-primary">Go to Home Feed</button>
-        </div>
-      </div>
-    );
-  }
+  const postAuthorId = item.userId?._id || item.userId;
+  const isAuthor = user?._id && postAuthorId && postAuthorId.toString() === user._id.toString();
 
-  const ownerId = item.userId?._id || item.userId;
-  if (ownerId && user?._id && ownerId.toString() !== user._id.toString()) {
+  if (!isAuthor) {
     return <Navigate to="/" replace />;
   }
 
@@ -66,7 +97,7 @@ export default function EditItem() {
           </p>
         </div>
 
-        <ItemForm type={item.type} itemToEdit={item} />
+        <ItemForm key={item._id} type={item.type} itemToEdit={item} />
       </div>
     </div>
   );

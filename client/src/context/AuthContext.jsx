@@ -3,43 +3,67 @@ import { getMe } from "../api/services";
 
 const AuthContext = createContext(null);
 
+function clearStoredSession() {
+  localStorage.removeItem("token");
+  localStorage.removeItem("user");
+}
+
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => Boolean(localStorage.getItem("token")));
 
-  // On mount, check if a stored token is still valid
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      setLoading(false);
+    const storedToken = localStorage.getItem("token");
+    if (!storedToken) {
       return;
     }
 
+    let isMounted = true;
+
     getMe()
-      .then((res) => setUser(res.data))
-      .catch(() => {
-        // Token expired or invalid — clear storage
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
+      .then(({ data: authenticatedUser }) => {
+        if (isMounted) {
+          setUser(authenticatedUser);
+        }
       })
-      .finally(() => setLoading(false));
+      .catch(() => {
+        clearStoredSession();
+      })
+      .finally(() => {
+        if (isMounted) {
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
-  const login = (token, userData) => {
-    localStorage.setItem("token", token);
-    localStorage.setItem("user", JSON.stringify(userData));
-    setUser(userData);
+  const login = (authToken, authenticatedUser) => {
+    localStorage.setItem("token", authToken);
+    localStorage.setItem("user", JSON.stringify(authenticatedUser));
+    setUser(authenticatedUser);
   };
 
   const logout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
+    clearStoredSession();
     setUser(null);
   };
 
-  const value = { user, setUser, login, logout, loading };
+  const authContextValue = {
+    user,
+    setUser,
+    login,
+    logout,
+    loading,
+  };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={authContextValue}>
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
 export function useAuth() {

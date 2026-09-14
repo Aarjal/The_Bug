@@ -1,11 +1,36 @@
 import CustomSelect from "./CustomSelect";
 
+function TypeFilterTabs({ activeType, onSelectType }) {
+  const filterTabs = [
+    { key: "", label: "All" },
+    { key: "lost", label: "Lost" },
+    { key: "found", label: "Found" },
+  ];
+
+  return (
+    <div className="type-tabs" role="tablist" aria-label="Item type filter">
+      {filterTabs.map(({ key, label }) => (
+        <button
+          key={key || "all"}
+          type="button"
+          role="tab"
+          aria-selected={activeType === key}
+          className={`type-tab ${activeType === key ? "active" : ""}`}
+          onClick={() => onSelectType(key)}
+        >
+          {label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 export default function FilterPanel({
   type,
   onTypeChange,
   category,
   onCategoryChange,
-  categoriesList,
+  categoriesList = [],
   status,
   onStatusChange,
   location,
@@ -31,54 +56,41 @@ export default function FilterPanel({
     { value: "oldest", label: "Oldest First" },
   ];
 
+  // Dispatches either direct value or synthetic event for backward compatibility
+  const dispatchChange = (handler, nextValue) => {
+    if (!handler) return;
+    try {
+      handler({ target: { value: nextValue } });
+    } catch {
+      handler(nextValue);
+    }
+  };
+
   return (
     <div className="filters-row">
       <div className="filters-group-left">
-        {/* Type tabs */}
-        <div className="type-tabs">
-          <button
-            className={`type-tab ${type === "" ? "active" : ""}`}
-            onClick={() => onTypeChange("")}
-          >
-            All
-          </button>
-          <button
-            className={`type-tab ${type === "lost" ? "active" : ""}`}
-            onClick={() => onTypeChange("lost")}
-          >
-            Lost
-          </button>
-          <button
-            className={`type-tab ${type === "found" ? "active" : ""}`}
-            onClick={() => onTypeChange("found")}
-          >
-            Found
-          </button>
-        </div>
+        <TypeFilterTabs activeType={type} onSelectType={onTypeChange} />
 
-        {/* Category selection */}
         <div className="filter-select-wrapper">
           <CustomSelect
             id="feed-category-filter"
             value={category}
-            onChange={(val) => onCategoryChange({ target: { value: val } })}
+            onChange={(selected) => dispatchChange(onCategoryChange, selected)}
             options={categoryOptions}
             placeholder="All Categories"
           />
         </div>
 
-        {/* Status selection */}
         <div className="filter-select-wrapper">
           <CustomSelect
             id="feed-status-filter"
             value={status}
-            onChange={(val) => onStatusChange({ target: { value: val } })}
+            onChange={(selected) => dispatchChange(onStatusChange, selected)}
             options={statusOptions}
             placeholder="All Statuses"
           />
         </div>
 
-        {/* Location input */}
         <div className="filter-select-wrapper location-input-field">
           <label htmlFor="feed-location-filter" className="sr-only">
             Filter by Location
@@ -93,12 +105,11 @@ export default function FilterPanel({
           />
         </div>
 
-        {/* Sort selection */}
         <div className="filter-select-wrapper">
           <CustomSelect
             id="feed-sort-filter"
             value={sort}
-            onChange={(val) => onSortChange({ target: { value: val } })}
+            onChange={(selected) => dispatchChange(onSortChange, selected)}
             options={sortOptions}
             placeholder="Newest First"
           />
@@ -108,6 +119,7 @@ export default function FilterPanel({
       <div className="filters-group-right">
         {isFiltered && (
           <button
+            type="button"
             onClick={onReset}
             className="btn btn-outline"
             style={{ padding: "0.5rem 1rem", fontSize: "0.85rem", height: "38px" }}

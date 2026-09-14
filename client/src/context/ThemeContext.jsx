@@ -2,54 +2,38 @@ import { createContext, useContext, useState, useEffect } from "react";
 
 const ThemeContext = createContext();
 
-export function ThemeProvider({ children }) {
-  // Read initial theme preference from localStorage or default to "system"
-  const [theme, setThemeState] = useState(() => {
-    return localStorage.getItem("theme") || "system";
-  });
+function resolveSystemTheme() {
+  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+}
 
+export function ThemeProvider({ children }) {
+  const [theme, setThemeState] = useState(() => localStorage.getItem("theme") || "system");
   const [effectiveTheme, setEffectiveTheme] = useState("light");
 
-  const setTheme = (newTheme) => {
-    setThemeState(newTheme);
-    localStorage.setItem("theme", newTheme);
+  const setTheme = (selectedTheme) => {
+    setThemeState(selectedTheme);
+    localStorage.setItem("theme", selectedTheme);
   };
 
   useEffect(() => {
-    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    const colorSchemeQuery = window.matchMedia("(prefers-color-scheme: dark)");
 
-    const applyTheme = () => {
-      let resolvedTheme = theme;
+    const syncDOMTheme = () => {
+      const activeTheme = theme === "system" ? resolveSystemTheme() : theme;
+      setEffectiveTheme(activeTheme);
+      document.documentElement.setAttribute("data-theme", activeTheme);
+    };
+
+    syncDOMTheme();
+
+    const handleSystemThemeChange = () => {
       if (theme === "system") {
-        resolvedTheme = mediaQuery.matches ? "dark" : "light";
-      }
-
-      setEffectiveTheme(resolvedTheme);
-      document.documentElement.setAttribute("data-theme", resolvedTheme);
-    };
-
-    applyTheme();
-
-    // Listen for OS color scheme changes when theme is set to "system"
-    const handleChange = () => {
-      if (theme === "system") {
-        applyTheme();
+        syncDOMTheme();
       }
     };
 
-    if (mediaQuery.addEventListener) {
-      mediaQuery.addEventListener("change", handleChange);
-    } else {
-      mediaQuery.addListener(handleChange);
-    }
-
-    return () => {
-      if (mediaQuery.removeEventListener) {
-        mediaQuery.removeEventListener("change", handleChange);
-      } else {
-        mediaQuery.removeListener(handleChange);
-      }
-    };
+    colorSchemeQuery.addEventListener("change", handleSystemThemeChange);
+    return () => colorSchemeQuery.removeEventListener("change", handleSystemThemeChange);
   }, [theme]);
 
   return (

@@ -7,48 +7,78 @@ import { loginUser } from "../api/services";
 import { getErrorMessage } from "../utils/helpers";
 import "../styles/Auth.css";
 
+function PasswordInput({ value, onChange, disabled }) {
+  const [isRevealed, setIsRevealed] = useState(false);
+
+  return (
+    <div className="password-wrapper">
+      <input
+        id="login-password"
+        className="form-input"
+        type={isRevealed ? "text" : "password"}
+        name="password"
+        placeholder="Enter your password"
+        value={value}
+        onChange={onChange}
+        autoComplete="current-password"
+        disabled={disabled}
+        required
+      />
+      <button
+        type="button"
+        className="password-toggle"
+        onClick={() => setIsRevealed((prev) => !prev)}
+        aria-label={isRevealed ? "Hide password" : "Show password"}
+      >
+        {isRevealed ? <EyeOff size={18} /> : <Eye size={18} />}
+      </button>
+    </div>
+  );
+}
+
 export default function Login() {
   const { user, login } = useAuth();
   const navigate = useNavigate();
   const { addToast } = useToast();
 
-  const [form, setForm] = useState({ email: "", password: "" });
-  const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [credentials, setCredentials] = useState({ email: "", password: "" });
+  const [errorMessage, setErrorMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // If already logged in, redirect to home
-  if (user) return <Navigate to="/" replace />;
+  if (user) {
+    return <Navigate to="/" replace />;
+  }
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-    if (error) setError(""); // Clear error on input change
+  const handleFieldChange = (event) => {
+    const { name, value } = event.target;
+    setCredentials((prev) => ({ ...prev, [name]: value }));
+    if (errorMessage) setErrorMessage("");
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
+  const handleFormSubmit = async (event) => {
+    event.preventDefault();
+    setErrorMessage("");
 
-    // Client-side validation
-    if (!form.email.trim() || !form.password) {
-      setError("Please fill in all fields");
+    const trimmedEmail = credentials.email.trim();
+    if (!trimmedEmail || !credentials.password) {
+      setErrorMessage("Please fill in all fields");
       return;
     }
 
-    setLoading(true);
+    setIsSubmitting(true);
     try {
       const { data } = await loginUser({
-        email: form.email.trim(),
-        password: form.password,
+        email: trimmedEmail,
+        password: credentials.password,
       });
       login(data.token, data.user);
       addToast(`Welcome back, ${data.user.username}!`, "success");
       navigate("/", { replace: true });
     } catch (err) {
-      setError(getErrorMessage(err));
-      addToast("Failed to sign in. Please try again.", "error");
+      setErrorMessage(getErrorMessage(err));
+      addToast("Failed to sign in. Please check your credentials.", "error");
     } finally {
-      setLoading(false);
+      setIsSubmitting(false);
     }
   };
 
@@ -57,15 +87,15 @@ export default function Login() {
       <div className="auth-card">
         <div className="auth-header">
           <div className="auth-logo">
-            <LogIn size={24} />
+            <LogIn size={24} aria-hidden="true" />
           </div>
           <h1>Welcome back</h1>
           <p>Sign in to your Lost &amp; Found account</p>
         </div>
 
-        {error && <div className="alert alert-error">{error}</div>}
+        {errorMessage && <div className="alert alert-error">{errorMessage}</div>}
 
-        <form className="auth-form" onSubmit={handleSubmit} noValidate>
+        <form className="auth-form" onSubmit={handleFormSubmit} noValidate>
           <div className="form-group">
             <label className="form-label" htmlFor="login-email">
               Email
@@ -76,9 +106,10 @@ export default function Login() {
               type="email"
               name="email"
               placeholder="you@example.com"
-              value={form.email}
-              onChange={handleChange}
+              value={credentials.email}
+              onChange={handleFieldChange}
               autoComplete="email"
+              disabled={isSubmitting}
               autoFocus
             />
           </div>
@@ -87,34 +118,19 @@ export default function Login() {
             <label className="form-label" htmlFor="login-password">
               Password
             </label>
-            <div className="password-wrapper">
-              <input
-                id="login-password"
-                className="form-input"
-                type={showPassword ? "text" : "password"}
-                name="password"
-                placeholder="Enter your password"
-                value={form.password}
-                onChange={handleChange}
-                autoComplete="current-password"
-              />
-              <button
-                type="button"
-                className="password-toggle"
-                onClick={() => setShowPassword(!showPassword)}
-                aria-label={showPassword ? "Hide password" : "Show password"}
-              >
-                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-              </button>
-            </div>
+            <PasswordInput
+              value={credentials.password}
+              onChange={handleFieldChange}
+              disabled={isSubmitting}
+            />
           </div>
 
           <button
             type="submit"
             className="btn btn-primary btn-block auth-submit"
-            disabled={loading}
+            disabled={isSubmitting}
           >
-            {loading ? <span className="spinner" /> : "Sign In"}
+            {isSubmitting ? <span className="spinner" /> : "Sign In"}
           </button>
         </form>
 

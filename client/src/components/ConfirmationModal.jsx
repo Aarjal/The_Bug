@@ -1,4 +1,4 @@
-import { AlertTriangle, X } from "lucide-react";
+import { AlertTriangle, Info, X } from "lucide-react";
 import "../styles/ConfirmationModal.css";
 
 export default function ConfirmationModal({
@@ -9,34 +9,38 @@ export default function ConfirmationModal({
   cancelText = "Cancel",
   onConfirm,
   onCancel,
-  type = "warning", // 'warning' | 'danger' | 'info'
+  type = "warning",
 }) {
   if (!isOpen) return null;
 
+  const isDestructive = type === "danger";
+  const IconComponent = isDestructive || type === "warning" ? AlertTriangle : Info;
+  const confirmButtonClass = isDestructive ? "btn-danger" : "btn-primary";
+
   return (
-    <div className="confirm-overlay" onClick={onCancel}>
-      <div className="confirm-card" onClick={(e) => e.stopPropagation()}>
+    <div className="confirm-overlay" onClick={onCancel} role="dialog" aria-modal="true">
+      <div className="confirm-card" onClick={(event) => event.stopPropagation()}>
         <div className="confirm-header">
           <div className="confirm-title-wrapper">
-            {(type === "danger" || type === "warning") && (
-              <AlertTriangle className={`confirm-icon icon-${type}`} size={20} />
-            )}
+            <IconComponent className={`confirm-icon icon-${type}`} size={20} />
             <h3>{title}</h3>
           </div>
-          <button className="confirm-close-btn" onClick={onCancel} aria-label="Close">
+          <button className="confirm-close-btn" onClick={onCancel} aria-label="Close dialog">
             <X size={18} />
           </button>
         </div>
+
         <div className="confirm-body">
           <p>{message}</p>
         </div>
+
         <div className="confirm-footer">
           <button type="button" className="btn btn-outline btn-sm" onClick={onCancel}>
             {cancelText}
           </button>
           <button
             type="button"
-            className={`btn btn-sm ${type === "danger" ? "btn-danger" : "btn-primary"}`}
+            className={`btn btn-sm ${confirmButtonClass}`}
             onClick={onConfirm}
           >
             {confirmText}

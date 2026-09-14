@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Upload, X, AlertCircle } from "lucide-react";
 import { createItem, updateItem } from "../api/services";
@@ -6,151 +6,212 @@ import { useToast } from "../context/ToastContext";
 import { CATEGORIES, getErrorMessage } from "../utils/helpers";
 import "../styles/Form.css";
 
+const MAX_IMAGE_BYTES = 5 * 1024 * 1024; // 5 MB ceiling for client uploads
+
+function FieldErrorMessage({ message }) {
+  if (!message) return null;
+  return <div className="error-text">{message}</div>;
+}
+
+function ImageUploadField({ imageSource, onFileSelected, onRemoveImage, errorMessage }) {
+  const filePickerRef = useRef(null);
+
+  return (
+    <div className="form-group form-grid-full image-upload-container">
+      <span className="form-label">Attach Photo</span>
+      {imageSource ? (
+        <div className="image-preview-wrapper">
+          <img src={imageSource} alt="Attached item preview" className="image-preview" />
+          <button
+            type="button"
+            className="image-remove-btn"
+            onClick={onRemoveImage}
+            aria-label="Remove attached image"
+          >
+            <X size={18} />
+          </button>
+        </div>
+      ) : (
+        <div
+          className="image-dropzone"
+          role="button"
+          tabIndex={0}
+          onClick={() => filePickerRef.current?.click()}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              filePickerRef.current?.click();
+            }
+          }}
+        >
+          <Upload size={32} strokeWidth={1.5} aria-hidden="true" />
+          <span style={{ fontWeight: 600, fontSize: "0.88rem" }}>Upload an image</span>
+          <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>
+            Supports JPG, PNG up to 5MB
+          </span>
+        </div>
+      )}
+
+      <input
+        type="file"
+        ref={filePickerRef}
+        onChange={onFileSelected}
+        accept="image/*"
+        style={{ display: "none" }}
+        aria-hidden="true"
+      />
+      <FieldErrorMessage message={errorMessage} />
+    </div>
+  );
+}
+
+function buildInitialFormData(itemToEdit) {
+  if (!itemToEdit) {
+    return {
+      title: "",
+      category: "",
+      description: "",
+      location: "",
+      date: "",
+      image: "",
+    };
+  }
+
+  const rawDate = itemToEdit.type === "lost" ? itemToEdit.dateLost : itemToEdit.dateFound;
+  const isoDateString = rawDate ? new Date(rawDate).toISOString().split("T")[0] : "";
+
+  return {
+    title: itemToEdit.title || "",
+    category: itemToEdit.category || "",
+    description: itemToEdit.description || "",
+    location: itemToEdit.location || "",
+    date: isoDateString,
+    image: itemToEdit.image || "",
+  };
+}
+
 export default function ItemForm({ type, itemToEdit }) {
   const navigate = useNavigate();
-  const fileInputRef = useRef(null);
   const { addToast } = useToast();
 
-  const [form, setForm] = useState({
-    title: "",
-    category: "",
-    description: "",
-    location: "",
-    date: "",
-    image: "",
-  });
+  const [formData, setFormData] = useState(() => buildInitialFormData(itemToEdit));
+  const [validationErrors, setValidationErrors] = useState({});
+  const [submissionError, setSubmissionError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [errors, setErrors] = useState({});
-  const [submitError, setSubmitError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const isLostItem = type === "lost";
+  const isEditMode = Boolean(itemToEdit);
 
-  const isLost = type === "lost";
-  const isEditing = !!itemToEdit;
-
-  // Load edit data if editing
-  useEffect(() => {
-    if (itemToEdit) {
-      const dateVal = itemToEdit.type === "lost" ? itemToEdit.dateLost : itemToEdit.dateFound;
-      const formattedDate = dateVal ? new Date(dateVal).toISOString().split("T")[0] : "";
-
-      setForm({
-        title: itemToEdit.title || "",
-        category: itemToEdit.category || "",
-        description: itemToEdit.description || "",
-        location: itemToEdit.location || "",
-        date: formattedDate,
-        image: itemToEdit.image || "",
-      });
-    }
-  }, [itemToEdit]);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm({ ...form, [name]: value });
-    if (errors[name]) {
-      setErrors({ ...errors, [name]: "" });
+  const handleInputChange = (event) => {
+    const { name, value } = event.target;
+    setFormData((prevData) => ({ ...prevData, [name]: value }));
+    if (validationErrors[name]) {
+      setValidationErrors((prevErrors) => ({ ...prevErrors, [name]: "" }));
     }
   };
 
-  // Convert uploaded image to Base64
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+  const handleImageUpload = (event) => {
+    const selectedFile = event.target.files?.[0];
+    if (!selectedFile) return;
 
-    if (file.size > 5 * 1024 * 1024) {
-      setErrors({ ...errors, image: "Image size must be under 5MB" });
+    if (selectedFile.size > MAX_IMAGE_BYTES) {
+      setValidationErrors((prev) => ({ ...prev, image: "Image size must be under 5MB" }));
       return;
     }
 
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setForm({ ...form, image: reader.result });
-      setErrors({ ...errors, image: "" });
+    const fileReader = new FileReader();
+    fileReader.onloadend = () => {
+      setFormData((prevData) => ({ ...prevData, image: fileReader.result }));
+      setValidationErrors((prevErrors) => ({ ...prevErrors, image: "" }));
     };
-    reader.readAsDataURL(file);
+    fileReader.readAsDataURL(selectedFile);
   };
 
-  const removeImage = () => {
-    setForm({ ...form, image: "" });
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
+  const handleRemoveImage = () => {
+    setFormData((prevData) => ({ ...prevData, image: "" }));
+  };
+
+  const validateForm = () => {
+    const detectedErrors = {};
+
+    if (!formData.title.trim()) {
+      detectedErrors.title = "Title is required";
+    } else if (formData.title.trim().length < 3) {
+      detectedErrors.title = "Title must be at least 3 characters";
     }
-  };
 
-  const validate = () => {
-    const tempErrors = {};
-    if (!form.title.trim()) tempErrors.title = "Title is required";
-    else if (form.title.length < 3) tempErrors.title = "Title must be at least 3 characters";
+    if (!formData.category) {
+      detectedErrors.category = "Category is required";
+    }
 
-    if (!form.category) tempErrors.category = "Category is required";
+    if (!formData.description.trim()) {
+      detectedErrors.description = "Description is required";
+    } else if (formData.description.trim().length < 10) {
+      detectedErrors.description = "Description must be at least 10 characters";
+    }
 
-    if (!form.description.trim()) tempErrors.description = "Description is required";
-    else if (form.description.length < 10) tempErrors.description = "Description must be at least 10 characters";
+    if (!formData.location.trim()) {
+      detectedErrors.location = "Location is required";
+    }
 
-    if (!form.location.trim()) tempErrors.location = "Location is required";
-
-    if (!form.date) {
-      tempErrors.date = `Date ${isLost ? "lost" : "found"} is required`;
+    if (!formData.date) {
+      detectedErrors.date = `Date ${isLostItem ? "lost" : "found"} is required`;
     } else {
-      const selectedDate = new Date(form.date);
-      const today = new Date();
-      if (selectedDate > today) {
-        tempErrors.date = "Date cannot be in the future";
+      const parsedDate = new Date(formData.date);
+      const currentDate = new Date();
+      if (parsedDate > currentDate) {
+        detectedErrors.date = "Date cannot be in the future";
       }
     }
 
-    setErrors(tempErrors);
-    return Object.keys(tempErrors).length === 0;
+    setValidationErrors(detectedErrors);
+    return Object.keys(detectedErrors).length === 0;
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setSubmitError("");
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setSubmissionError("");
 
-    if (!validate()) return;
+    if (!validateForm()) return;
 
-    setLoading(true);
+    setIsSubmitting(true);
     try {
-      const payload = {
-        title: form.title.trim(),
-        category: form.category,
-        description: form.description.trim(),
-        location: form.location.trim(),
-        image: form.image,
-        dateLost: isLost ? form.date : undefined,
-        dateFound: !isLost ? form.date : undefined,
+      const commonPayload = {
+        title: formData.title.trim(),
+        category: formData.category,
+        description: formData.description.trim(),
+        location: formData.location.trim(),
+        image: formData.image,
+        dateLost: isLostItem ? formData.date : undefined,
+        dateFound: !isLostItem ? formData.date : undefined,
       };
 
-      if (isEditing) {
-        await updateItem(itemToEdit._id, payload);
+      if (isEditMode) {
+        await updateItem(itemToEdit._id, commonPayload);
         addToast("Report updated successfully!", "success");
         navigate(`/item/${itemToEdit._id}`, { replace: true });
       } else {
-        // Create mode
-        const createPayload = { ...payload, type };
-        await createItem(createPayload);
+        await createItem({ ...commonPayload, type });
         addToast("Report submitted successfully!", "success");
         navigate("/", { replace: true });
       }
     } catch (err) {
-      setSubmitError(getErrorMessage(err));
-      addToast("Failed to submit report. Please check errors.", "error");
+      setSubmissionError(getErrorMessage(err));
+      addToast("Failed to submit report. Please review the errors.", "error");
     } finally {
-      setLoading(false);
+      setIsSubmitting(false);
     }
   };
 
   return (
     <form className="form-card" onSubmit={handleSubmit} noValidate>
-      {submitError && (
+      {submissionError && (
         <div className="alert alert-error" style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
           <AlertCircle size={18} />
-          <span>{submitError}</span>
+          <span>{submissionError}</span>
         </div>
       )}
 
       <div className="form-grid">
-        {/* Title */}
         <div className="form-group form-grid-full">
           <label className="form-label" htmlFor="form-title">
             Item Title
@@ -158,16 +219,15 @@ export default function ItemForm({ type, itemToEdit }) {
           <input
             id="form-title"
             name="title"
-            className={`form-input ${errors.title ? "invalid" : ""}`}
+            className={`form-input ${validationErrors.title ? "invalid" : ""}`}
             type="text"
             placeholder="e.g. Black Leather Trifold Wallet"
-            value={form.title}
-            onChange={handleChange}
+            value={formData.title}
+            onChange={handleInputChange}
           />
-          {errors.title && <div className="error-text">{errors.title}</div>}
+          <FieldErrorMessage message={validationErrors.title} />
         </div>
 
-        {/* Category */}
         <div className="form-group">
           <label className="form-label" htmlFor="form-category">
             Category
@@ -175,54 +235,51 @@ export default function ItemForm({ type, itemToEdit }) {
           <select
             id="form-category"
             name="category"
-            className={`form-select ${errors.category ? "invalid" : ""}`}
-            value={form.category}
-            onChange={handleChange}
+            className={`form-select ${validationErrors.category ? "invalid" : ""}`}
+            value={formData.category}
+            onChange={handleInputChange}
           >
             <option value="">Select Category</option>
-            {CATEGORIES.map((cat) => (
-              <option key={cat.value} value={cat.value}>
-                {cat.label}
+            {CATEGORIES.map(({ value, label }) => (
+              <option key={value} value={value}>
+                {label}
               </option>
             ))}
           </select>
-          {errors.category && <div className="error-text">{errors.category}</div>}
+          <FieldErrorMessage message={validationErrors.category} />
         </div>
 
-        {/* Date picker */}
         <div className="form-group">
           <label className="form-label" htmlFor="form-date">
-            Date {isLost ? "Lost" : "Found"}
+            Date {isLostItem ? "Lost" : "Found"}
           </label>
           <input
             id="form-date"
             name="date"
-            className={`form-input ${errors.date ? "invalid" : ""}`}
+            className={`form-input ${validationErrors.date ? "invalid" : ""}`}
             type="date"
-            value={form.date}
-            onChange={handleChange}
+            value={formData.date}
+            onChange={handleInputChange}
           />
-          {errors.date && <div className="error-text">{errors.date}</div>}
+          <FieldErrorMessage message={validationErrors.date} />
         </div>
 
-        {/* Location */}
         <div className="form-group form-grid-full">
           <label className="form-label" htmlFor="form-location">
-            Location {isLost ? "Lost" : "Found"}
+            Location {isLostItem ? "Lost" : "Found"}
           </label>
           <input
             id="form-location"
             name="location"
-            className={`form-input ${errors.location ? "invalid" : ""}`}
+            className={`form-input ${validationErrors.location ? "invalid" : ""}`}
             type="text"
             placeholder="e.g. Near Library building, 2nd Floor"
-            value={form.location}
-            onChange={handleChange}
+            value={formData.location}
+            onChange={handleInputChange}
           />
-          {errors.location && <div className="error-text">{errors.location}</div>}
+          <FieldErrorMessage message={validationErrors.location} />
         </div>
 
-        {/* Description */}
         <div className="form-group form-grid-full">
           <label className="form-label" htmlFor="form-description">
             Detailed Description
@@ -230,40 +287,20 @@ export default function ItemForm({ type, itemToEdit }) {
           <textarea
             id="form-description"
             name="description"
-            className={`form-textarea ${errors.description ? "invalid" : ""}`}
+            className={`form-textarea ${validationErrors.description ? "invalid" : ""}`}
             placeholder="Describe unique characteristics, markings, brand names, or anything that helps identify the item..."
-            value={form.description}
-            onChange={handleChange}
+            value={formData.description}
+            onChange={handleInputChange}
           />
-          {errors.description && <div className="error-text">{errors.description}</div>}
+          <FieldErrorMessage message={validationErrors.description} />
         </div>
 
-        {/* Image Upload */}
-        <div className="form-group form-grid-full image-upload-container">
-          <span className="form-label">Attach Photo</span>
-          {form.image ? (
-            <div className="image-preview-wrapper">
-              <img src={form.image} alt="Preview" className="image-preview" />
-              <button type="button" className="image-remove-btn" onClick={removeImage} aria-label="Remove image">
-                <X size={18} />
-              </button>
-            </div>
-          ) : (
-            <div className="image-dropzone" onClick={() => fileInputRef.current.click()}>
-              <Upload size={32} strokeWidth={1.5} />
-              <span style={{ fontWeight: 600, fontSize: "0.88rem" }}>Upload an image</span>
-              <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>Supports JPG, PNG up to 5MB</span>
-            </div>
-          )}
-          <input
-            type="file"
-            ref={fileInputRef}
-            onChange={handleImageChange}
-            accept="image/*"
-            style={{ display: "none" }}
-          />
-          {errors.image && <div className="error-text">{errors.image}</div>}
-        </div>
+        <ImageUploadField
+          imageSource={formData.image}
+          onFileSelected={handleImageUpload}
+          onRemoveImage={handleRemoveImage}
+          errorMessage={validationErrors.image}
+        />
       </div>
 
       <div className="form-actions">
@@ -271,12 +308,23 @@ export default function ItemForm({ type, itemToEdit }) {
           type="button"
           className="btn btn-outline"
           onClick={() => navigate(-1)}
-          disabled={loading}
+          disabled={isSubmitting}
         >
           Cancel
         </button>
-        <button type="submit" className="btn btn-primary" disabled={loading} style={{ minWidth: "140px" }}>
-          {loading ? <span className="spinner" /> : isEditing ? "Save Changes" : "Submit Report"}
+        <button
+          type="submit"
+          className="btn btn-primary"
+          disabled={isSubmitting}
+          style={{ minWidth: "140px" }}
+        >
+          {isSubmitting ? (
+            <span className="spinner" />
+          ) : isEditMode ? (
+            "Save Changes"
+          ) : (
+            "Submit Report"
+          )}
         </button>
       </div>
     </form>

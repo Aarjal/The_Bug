@@ -9,7 +9,7 @@ export default function Footer() {
       <div className="container footer-content">
         <p>&copy; {currentYear} Lost &amp; Found. All rights reserved.</p>
         <p style={{ display: "inline-flex", alignItems: "center", gap: "0.25rem", color: "var(--text-muted)", fontSize: "0.8rem" }}>
-          Made with <Heart size={12} fill="var(--danger)" color="var(--danger)" /> for the community.
+          Made with <Heart size={12} fill="var(--danger)" color="var(--danger)" aria-label="love" /> for the community.
         </p>
       </div>
     </footer>

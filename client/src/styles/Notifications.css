@@ -1,7 +1,3 @@
-/* ========================================
-   Notifications Module CSS
-   ======================================== */
-
 .notifications-header {
   display: flex;
   align-items: center;
@@ -16,7 +12,6 @@
   gap: 1rem;
 }
 
-/* Notification Card Component */
 .notification-card {
   display: flex;
   align-items: flex-start;
@@ -90,7 +85,6 @@
   color: var(--text-muted);
 }
 
-/* Read / Unread Indicator Dot */
 .unread-indicator-dot {
   width: 8px;
   height: 8px;
@@ -100,7 +94,6 @@
   flex-shrink: 0;
 }
 
-/* Delete button on notification hover */
 .notification-delete-btn {
   background: none;
   border: none;
@@ -117,7 +110,6 @@
   background: rgba(229, 62, 62, 0.1);
 }
 
-/* Responsive */
 @media (max-width: 500px) {
   .notifications-header {
     flex-direction: column;

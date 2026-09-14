@@ -1,8 +1,3 @@
-/* ========================================
-   Admin Dashboard — Styles
-   ======================================== */
-
-/* --- Page Header --- */
 .admin-header {
   margin-bottom: 2rem;
 }
@@ -19,7 +14,6 @@
   font-size: 0.95rem;
 }
 
-/* --- Section Blocks --- */
 .admin-section {
   margin-bottom: 2.25rem;
 }
@@ -38,14 +32,12 @@
   color: var(--primary);
 }
 
-/* --- Stat Cards Grid --- */
 .stat-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 1rem;
 }
 
-/* Individual Stat Card */
 .stat-card {
   display: flex;
   align-items: center;
@@ -63,7 +55,6 @@
   transform: translateY(-2px);
 }
 
-/* Icon Container — base */
 .stat-icon {
   display: flex;
   align-items: center;
@@ -74,7 +65,6 @@
   flex-shrink: 0;
 }
 
-/* Color Modifiers */
 .stat-icon--blue {
   background: rgba(26, 72, 142, 0.1);
   color: var(--primary);
@@ -110,7 +100,6 @@
   color: var(--stat-indigo-text);
 }
 
-/* Stat Text */
 .stat-info {
   display: flex;
   flex-direction: column;
@@ -133,7 +122,6 @@
   line-height: 1.2;
 }
 
-/* --- Category Grid --- */
 .category-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
@@ -184,7 +172,6 @@
   color: var(--text-secondary);
 }
 
-/* --- Activity Table --- */
 .activity-table-wrapper {
   overflow-x: auto;
   background: var(--bg-card);
@@ -252,13 +239,11 @@
   white-space: nowrap;
 }
 
-/* Active badge (not in global index.css) */
 .badge-active {
   background: var(--badge-active-bg);
   color: var(--badge-active-text);
 }
 
-/* --- Loading / Empty States --- */
 .admin-loading {
   display: flex;
   flex-direction: column;
@@ -280,9 +265,6 @@
   padding: 2rem 0;
 }
 
-/* --- Responsive --- */
-
-/* Tablet */
 @media (max-width: 768px) {
   .stat-grid {
     grid-template-columns: repeat(2, 1fr);
@@ -297,7 +279,6 @@
   }
 }
 
-/* Mobile */
 @media (max-width: 500px) {
   .stat-grid {
     grid-template-columns: 1fr;
@@ -311,7 +292,6 @@
     font-size: 1.3rem;
   }
 
-  /* Table → stacked card layout */
   .activity-table thead {
     display: none;
   }

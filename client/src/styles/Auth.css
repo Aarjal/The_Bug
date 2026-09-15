@@ -30,7 +30,7 @@
   background: var(--primary);
   border-radius: var(--radius-md);
   margin-bottom: 1rem;
-  color: #fff;
+  color: var(--white);
 }
 
 .auth-header h1 {

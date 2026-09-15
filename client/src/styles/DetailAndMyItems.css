@@ -281,7 +281,7 @@
 }
 
 .match-score-badge {
-  background: rgba(72, 187, 120, 0.1);
+  background: var(--success-bg-subtle);
   color: var(--success);
   font-weight: 700;
   font-size: 0.82rem;
@@ -339,7 +339,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: var(--overlay-bg);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -423,5 +423,3 @@
     transform: translateY(0);
   }
 }
-
-

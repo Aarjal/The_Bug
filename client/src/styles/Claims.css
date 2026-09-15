@@ -1,4 +1,3 @@
-
 .claims-tabs {
   display: flex;
   border-bottom: 2px solid var(--border);
@@ -178,22 +177,22 @@
 }
 
 .status-badge.pending {
-  background: rgba(56, 178, 172, 0.1);
+  background: var(--accent-bg-subtle);
   color: var(--accent);
 }
 
 .status-badge.accepted {
-  background: rgba(72, 187, 120, 0.1);
+  background: var(--success-bg-subtle);
   color: var(--success);
 }
 
 .status-badge.rejected {
-  background: rgba(229, 62, 62, 0.1);
+  background: var(--danger-bg-subtle);
   color: var(--danger);
 }
 
 .contact-reveal-box {
-  background: rgba(72, 187, 120, 0.04);
+  background: var(--success-bg-subtle);
   border: 1px dashed var(--success);
   border-radius: var(--radius-md);
   padding: 0.8rem 1rem;
@@ -229,7 +228,7 @@
 }
 
 .claim-approved-box {
-  background: rgba(72, 187, 120, 0.08);
+  background: var(--success-bg-subtle);
   color: var(--success);
   border-radius: var(--radius-md);
   padding: 0.5rem 1rem;
@@ -244,7 +243,7 @@
 }
 
 .claim-rejected-box {
-  background: rgba(229, 62, 62, 0.08);
+  background: var(--danger-bg-subtle);
   color: var(--danger);
   border-radius: var(--radius-md);
   padding: 0.5rem 1rem;

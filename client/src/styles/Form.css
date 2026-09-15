@@ -61,7 +61,7 @@
 
 .image-dropzone:hover {
   border-color: var(--accent);
-  background: rgba(56, 178, 172, 0.03);
+  background: var(--accent-bg-subtle);
   color: var(--primary);
 }
 
@@ -84,8 +84,8 @@
   position: absolute;
   top: 0.75rem;
   right: 0.75rem;
-  background: rgba(26, 32, 44, 0.85);
-  color: #fff;
+  background: var(--overlay-btn-bg);
+  color: var(--white);
   border: none;
   width: 32px;
   height: 32px;

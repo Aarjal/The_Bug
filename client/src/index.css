@@ -1,14 +1,7 @@
-/* ========================================
-   Lost & Found — Global Design System
-   ======================================== */
-
-/* --- Google Font --- */
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
 
-/* --- CSS Variables Architecture --- */
 :root,
 [data-theme="light"] {
-  /* Brand Tokens */
   --primary: #1a488e;
   --primary-light: #2a5caa;
   --primary-dark: #133668;
@@ -18,8 +11,8 @@
   --success: #48bb78;
   --warning: #ecc94b;
   --danger: #f56565;
+  --white: #ffffff;
 
-  /* Surfaces & Neutrals */
   --bg: #f7f8fa;
   --surface: #ffffff;
   --bg-card: #ffffff;
@@ -27,12 +20,10 @@
   --border: #e2e6ee;
   --border-focus: var(--primary);
 
-  /* Typography */
   --text: #1a202c;
   --text-secondary: #64748b;
   --text-muted: #94a3b8;
 
-  /* Semantic Backgrounds */
   --bg-error: #fff5f5;
   --bg-success: #f0fff4;
   --bg-unread: #f7fafc;
@@ -40,6 +31,17 @@
   --text-success: #276749;
   --border-error: #fed7d7;
   --border-success: #c6f6d5;
+
+  --primary-bg-subtle: rgba(26, 72, 142, 0.08);
+  --accent-bg-subtle: rgba(56, 178, 172, 0.12);
+  --success-bg-subtle: rgba(72, 187, 120, 0.12);
+  --danger-bg-subtle: rgba(245, 101, 101, 0.1);
+  --warning-bg-subtle: rgba(236, 201, 75, 0.15);
+
+  --overlay-bg: rgba(15, 23, 42, 0.45);
+  --overlay-resolved: rgba(15, 23, 42, 0.65);
+  --overlay-btn-bg: rgba(15, 23, 42, 0.85);
+
   --badge-active-bg: rgba(56, 178, 172, 0.12);
   --badge-active-text: #234e52;
   --stat-amber-text: #b7791f;
@@ -51,24 +53,20 @@
   --hover-primary-bg: rgba(26, 72, 142, 0.04);
   --hover-primary-bg-strong: rgba(26, 72, 142, 0.08);
 
-  /* Shadows */
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
   --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.1);
 
-  /* Radius */
   --radius-sm: 6px;
   --radius-md: 10px;
   --radius-lg: 14px;
   --radius-full: 9999px;
 
-  /* Spacing & Utilities */
   --container-max: 1200px;
   --transition: 0.2s ease;
 }
 
 [data-theme="dark"] {
-  /* Brand Tokens for Dark Mode */
   --primary: #4f80cf;
   --primary-light: #6b98e3;
   --primary-dark: #2a5caa;
@@ -78,8 +76,8 @@
   --success: #38a169;
   --warning: #d69e2e;
   --danger: #e53e3e;
+  --white: #ffffff;
 
-  /* Surfaces & Neutrals for Dark Mode */
   --bg: #0f172a;
   --surface: #1e293b;
   --bg-card: #1e293b;
@@ -87,12 +85,10 @@
   --border: #334155;
   --border-focus: var(--primary-light);
 
-  /* Typography for Dark Mode */
   --text: #f8fafc;
   --text-secondary: #94a3b8;
   --text-muted: #64748b;
 
-  /* Semantic Backgrounds for Dark Mode */
   --bg-error: rgba(229, 62, 62, 0.12);
   --bg-success: rgba(72, 187, 120, 0.1);
   --bg-unread: rgba(79, 128, 207, 0.08);
@@ -100,6 +96,17 @@
   --text-success: #68d391;
   --border-error: rgba(229, 62, 62, 0.25);
   --border-success: rgba(72, 187, 120, 0.25);
+
+  --primary-bg-subtle: rgba(79, 128, 207, 0.12);
+  --accent-bg-subtle: rgba(49, 151, 149, 0.18);
+  --success-bg-subtle: rgba(56, 161, 105, 0.15);
+  --danger-bg-subtle: rgba(229, 62, 62, 0.15);
+  --warning-bg-subtle: rgba(214, 158, 46, 0.15);
+
+  --overlay-bg: rgba(0, 0, 0, 0.6);
+  --overlay-resolved: rgba(0, 0, 0, 0.7);
+  --overlay-btn-bg: rgba(15, 23, 42, 0.9);
+
   --badge-active-bg: rgba(56, 178, 172, 0.15);
   --badge-active-text: #81e6d9;
   --stat-amber-text: #f6e05e;
@@ -111,13 +118,11 @@
   --hover-primary-bg: rgba(79, 128, 207, 0.08);
   --hover-primary-bg-strong: rgba(79, 128, 207, 0.15);
 
-  /* Shadows for Dark Mode */
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
   --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
 }
 
-/* --- Reset & Base --- */
 *,
 *::before,
 *::after {
@@ -155,7 +160,6 @@ img {
   display: block;
 }
 
-/* --- Layout --- */
 .app-layout {
   min-height: 100vh;
   display: flex;
@@ -166,7 +170,6 @@ img {
   flex: 1;
 }
 
-/* --- Utility Classes --- */
 .container {
   width: 100%;
   max-width: var(--container-max);
@@ -185,7 +188,7 @@ img {
   border: 0;
 }
 
-/* --- Buttons --- */
+/* Button System */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -256,7 +259,7 @@ img {
   font-size: 0.82rem;
 }
 
-/* --- Error Card --- */
+/* Error Card Utility */
 .error-card {
   display: flex;
   flex-direction: column;
@@ -273,7 +276,7 @@ img {
   font-size: 0.9rem;
 }
 
-/* --- Form Elements --- */
+/* Form Controls */
 .form-group {
   margin-bottom: 1.1rem;
 }
@@ -338,7 +341,7 @@ img {
   min-height: 100px;
 }
 
-/* --- Alert / Error Messages --- */
+/* Feedback Alerts */
 .alert {
   padding: 0.7rem 1rem;
   border-radius: var(--radius-sm);
@@ -359,7 +362,7 @@ img {
   border: 1px solid var(--border-success);
 }
 
-/* --- Cards --- */
+/* Surface Cards */
 .card {
   background: var(--bg-card);
   border: 1px solid var(--border);
@@ -367,7 +370,7 @@ img {
   box-shadow: var(--shadow-sm);
 }
 
-/* --- Loading Spinner --- */
+/* Loading Spinners */
 .spinner {
   display: inline-block;
   width: 1.1rem;
@@ -389,7 +392,7 @@ img {
   }
 }
 
-/* --- Badge --- */
+/* Status Badges */
 .badge {
   display: inline-flex;
   align-items: center;
@@ -414,4 +417,95 @@ img {
 .badge-resolved {
   background: var(--bg-input);
   color: var(--text-muted);
+}
+
+.badge-active {
+  background: var(--badge-active-bg);
+  color: var(--badge-active-text);
+}
+
+/* Shared Empty State */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  gap: 1rem;
+}
+
+.empty-state-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--bg-input);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+}
+
+.empty-state h3 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.empty-state p {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  max-width: 340px;
+}
+
+/* Shared Skeleton Placeholders */
+.skeleton-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.skeleton-image {
+  height: 180px;
+  background: linear-gradient(90deg, var(--skeleton-from) 25%, var(--skeleton-mid) 50%, var(--skeleton-from) 75%);
+  background-size: 200% 100%;
+  animation: loading-pulse 1.4s infinite;
+}
+
+.skeleton-body {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.skeleton-line {
+  background: linear-gradient(90deg, var(--skeleton-from) 25%, var(--skeleton-mid) 50%, var(--skeleton-from) 75%);
+  background-size: 200% 100%;
+  animation: loading-pulse 1.4s infinite;
+  border-radius: 4px;
+  height: 16px;
+}
+
+.skeleton-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--skeleton-from);
+}
+
+@keyframes loading-pulse {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }

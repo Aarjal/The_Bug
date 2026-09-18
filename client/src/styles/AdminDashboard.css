@@ -1,3 +1,4 @@
+/* Admin header */
 .admin-header {
   margin-bottom: 2rem;
 }
@@ -32,6 +33,7 @@
   color: var(--primary);
 }
 
+/* Stat cards */
 .stat-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -122,6 +124,7 @@
   line-height: 1.2;
 }
 
+/* Category cards */
 .category-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
@@ -172,6 +175,7 @@
   color: var(--text-secondary);
 }
 
+/* Activity table */
 .activity-table-wrapper {
   overflow-x: auto;
   background: var(--bg-card);
@@ -244,6 +248,7 @@
   color: var(--badge-active-text);
 }
 
+/* Loading / empty states */
 .admin-loading {
   display: flex;
   flex-direction: column;
@@ -265,6 +270,7 @@
   padding: 2rem 0;
 }
 
+/* Responsive */
 @media (max-width: 768px) {
   .stat-grid {
     grid-template-columns: repeat(2, 1fr);

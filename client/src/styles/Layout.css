@@ -1,3 +1,4 @@
+/* App shell */
 .app-layout {
   min-height: 100vh;
   display: flex;
@@ -12,6 +13,7 @@
   flex-direction: column;
 }
 
+/* Navbar */
 .navbar {
   background: var(--bg-card);
   border-bottom: 1px solid var(--border);
@@ -83,6 +85,7 @@
   gap: 1rem;
 }
 
+/* Profile dropdown */
 .profile-menu-container {
   position: relative;
 }
@@ -199,6 +202,7 @@
   background: var(--danger-bg-subtle);
 }
 
+/* Theme switcher in dropdown */
 .dropdown-theme-section {
   padding: 0.75rem;
   border-top: 1px solid var(--border);
@@ -252,6 +256,7 @@
   font-weight: 600;
 }
 
+/* Mobile nav — overlay approach */
 .mobile-toggle {
   display: none;
   background: none;
@@ -337,6 +342,7 @@
   color: var(--text-muted);
 }
 
+/* Footer */
 .footer {
   background: var(--bg-card);
   border-top: 1px solid var(--border);
@@ -353,6 +359,7 @@
   gap: 0.5rem;
 }
 
+/* Breakpoints */
 @media (max-width: 900px) {
   .nav-menu {
     display: none;

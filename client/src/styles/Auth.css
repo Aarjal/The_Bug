@@ -1,3 +1,4 @@
+/* Auth pages (login/register) */
 .auth-page {
   display: flex;
   align-items: center;
@@ -70,6 +71,7 @@
   text-decoration: underline;
 }
 
+/* Password toggle */
 .password-wrapper {
   position: relative;
 }
@@ -97,6 +99,7 @@
   color: var(--text-secondary);
 }
 
+/* Mobile: full screen */
 @media (max-width: 480px) {
   .auth-card {
     padding: 2rem 1.25rem;

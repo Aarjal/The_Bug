@@ -1,9 +1,11 @@
+/* Feed page layout */
 .feed-layout {
   display: flex;
   flex-direction: column;
   gap: 2rem;
 }
 
+/* Filter panel */
 .filter-panel {
   background: var(--bg-card);
   border: 1px solid var(--border);
@@ -70,6 +72,7 @@
   flex: 1;
 }
 
+/* Type tabs (lost/found/all) */
 .type-tabs {
   display: flex;
   background: var(--bg-input);
@@ -105,6 +108,7 @@
   box-shadow: var(--shadow-sm);
 }
 
+/* Custom select dropdowns */
 .filter-select-wrapper {
   min-width: 160px;
 }
@@ -199,6 +203,7 @@
   align-items: center;
 }
 
+/* Responsive filters */
 @media (max-width: 768px) {
   .filters-row {
     flex-direction: column;
@@ -242,12 +247,14 @@
   }
 }
 
+/* Item grid */
 .feed-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 1.5rem;
 }
 
+/* Item card */
 .item-card {
   display: flex;
   flex-direction: column;
@@ -406,6 +413,7 @@
   white-space: nowrap;
 }
 
+/* Pagination */
 .pagination-container {
   display: flex;
   align-items: center;
@@ -420,7 +428,7 @@
   font-weight: 500;
 }
 
-/* Specific skeleton card layout helpers (base loading-pulse and skeleton shapes in index.css) */
+/* Skeleton helpers specific to feed cards */
 .skeleton-body {
   padding: 1.25rem;
   display: flex;

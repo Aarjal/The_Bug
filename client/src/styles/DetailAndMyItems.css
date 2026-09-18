@@ -1,3 +1,4 @@
+/* Detail page layout */
 .detail-layout {
   display: grid;
   grid-template-columns: 1.2fr 1fr;
@@ -123,6 +124,7 @@
   flex-wrap: wrap;
 }
 
+/* My Items / Dashboard */
 .dashboard-layout {
   display: flex;
   flex-direction: column;
@@ -207,6 +209,7 @@
   background: var(--bg-success);
 }
 
+/* Responsive */
 @media (max-width: 850px) {
   .detail-layout {
     grid-template-columns: 1fr;
@@ -240,6 +243,7 @@
   }
 }
 
+/* Matches section (shown on detail page) */
 .matches-section {
   margin-top: 3.5rem;
   border-top: 2px dashed var(--border);
@@ -333,6 +337,7 @@
   color: var(--text-muted);
 }
 
+/* Modal (shared) */
 .modal-overlay {
   position: fixed;
   top: 0;

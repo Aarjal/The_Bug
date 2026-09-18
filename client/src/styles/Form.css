@@ -1,3 +1,4 @@
+/* Report item form */
 .form-card {
   max-width: 680px;
   width: 100%;
@@ -27,6 +28,7 @@
   color: var(--text-secondary);
 }
 
+/* Two-column grid */
 .form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -37,6 +39,7 @@
   grid-column: span 2;
 }
 
+/* Image upload */
 .image-upload-container {
   display: flex;
   flex-direction: column;
@@ -102,20 +105,7 @@
   background: var(--danger);
 }
 
-.error-text {
-  font-size: 0.78rem;
-  color: var(--danger);
-  margin-top: 0.25rem;
-  font-weight: 500;
-}
-
-.form-input.invalid,
-.form-select.invalid,
-.form-textarea.invalid {
-  border-color: var(--danger);
-  background-color: var(--bg-error);
-}
-
+/* Form actions */
 .form-actions {
   display: flex;
   align-items: center;
@@ -126,6 +116,7 @@
   padding-top: 1.5rem;
 }
 
+/* Responsive */
 @media (max-width: 600px) {
   .form-card {
     padding: 1.5rem 1rem;

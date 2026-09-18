@@ -1,3 +1,4 @@
+/* Notifications page */
 .notifications-header {
   display: flex;
   align-items: center;
@@ -31,6 +32,7 @@
   border-color: var(--primary-light);
 }
 
+/* Unread state */
 .notification-card.unread {
   background: var(--bg-unread);
   border-left: 4px solid var(--primary);
@@ -94,6 +96,7 @@
   flex-shrink: 0;
 }
 
+/* Delete button */
 .notification-delete-btn {
   background: none;
   border: none;
@@ -110,6 +113,7 @@
   background: var(--danger-bg-subtle);
 }
 
+/* Responsive */
 @media (max-width: 500px) {
   .notifications-header {
     flex-direction: column;

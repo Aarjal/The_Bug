@@ -1,124 +1,120 @@
-# Lost & Found
+<p align="center">
+  <img src="client/public/favicon.png" alt="Lost&Found logo" width="120"/>
+</p>
 
-A location-based community platform that helps people actually get their lost stuff back. Built this because losing things sucks and there wasn't a good way to match lost items with found ones in real-time.
-
-The core idea: when someone reports a lost item, the system automatically scans existing "found" reports (and vice versa) using a matching engine that looks at titles, descriptions, location, and timing. If confidence is high enough, both parties get notified.
-
----
-
-## What it does
-
-- **Smart matching** — Not just keyword search. Uses Jaccard + Containment similarity on tokenized text, plus location proximity and timeline validation. Scores ≥30% trigger notifications.
-- **Two flows** — Report lost items OR report found items. Both support photos, categories, location, dates.
-- **Recovery claims** — Found something? Someone claims it? Built-in messaging and status tracking (Pending → Accepted/Rejected).
-- **Real-time alerts** — WebSocket notifications the moment a potential match lands.
-- **Feed with actual filters** — Search + multi-select dropdowns for category, status, location, sort. Not a fake filter UI.
-- **Admin dashboard** — Metrics, recovery rates, category breakdowns. Mostly for debugging but kept it.
-- **Light/dark mode** — CSS variables, respects system preference, persists choice.
+<h1 align="center">Lost&Found</h1>
+<p align="center"><i>A platform for people to seek, share, inform and retain the lost valueables in an easy and efficient manner.. </i></p>
 
 ---
+<p>
+<p>
+<p>
+  
+## Current Status
 
-## Stack
-
-| Layer | What's running |
-|-------|----------------|
-| Frontend | React 19, Vite, React Router 7, Lucide Icons, vanilla CSS (no framework) |
-| Backend | Node.js, Express |
-| Database | MongoDB + Mongoose |
-| Auth | JWT + bcryptjs |
-
----
-
-## Project structure
-
-```
-The_Bug/
-├── client/                     # React + Vite frontend
-│   ├── src/
-│   │   ├── components/         # Navbar, CustomSelect, Toast, etc.
-│   │   ├── context/            # Auth, Theme, Notifications, Toast
-│   │   ├── pages/              # Feed, AdminDashboard, Auth, RecoveryRequests
-│   │   ├── styles/             # Modular CSS files
-│   │   └── App.jsx             # Routes
-│   └── package.json
-└── server/                     # Express API
-    ├── config/                 # DB config
-    ├── controllers/            # Route handlers
-    ├── models/                 # User, Item, Notification, RecoveryRequest
-    ├── routes/                 # Express routes
-    ├── services/               # Matching algorithm lives here
-    ├── scripts/                # DB reset, seed scripts
-    └── server.js               # Entry point
-```
+This is still in building phase. The groundwork for the application is there but there's yet to add lots and lots of functionality. However, a simple general workflow is still possible with the current version. The UI/UX isn't there yet indeed but for now I'm just happy with how it works.
+The login page is just a demo version for now--  
+You may use demo email and password :)
 
 ---
+<p>
+<p>
+<p>
+  
+## About Lost&Found
 
-## How the matching actually works
+Lost&Found is a full-stack web application where-
 
-This is the part I spent way too long on. When a new item comes in (say, "lost: black backpack"), it gets scored against every opposite-type item in the same category:
+--people can post about random stuff they've found in their locality which may be someone else's valueable in news feed.  
+--seekers can browse through the available lost items if their item is also found by someone so they can retain it.
+--the found = lost item case is handled with furthur processes where founder and seeker can exchange their contact       information and finally the lost item.
+--the solved cases will be removed from the news feed.
 
-1. **Date check** — Hard fail if `dateFound` < `dateLost`. No point continuing.
-2. **Category** — Must match exactly. No cross-category matches.
-3. **Title similarity (40 pts)** — Tokenize, strip punctuation, drop stop words, then hybrid Jaccard/Containment with substring support. Catches "backpack" vs "black backpack" etc.
-4. **Description similarity (35 pts)** — Overlapping attribute keywords: colors, brands, unique identifiers (serial numbers, stickers, damage marks).
-5. **Location similarity (25 pts)** — Token-based geolocation name matching.
-6. **Threshold** — ≥30% total = notification pair created for both users.
-
-The weights came from trial and error. Could probably tune them more but it works well enough.
-
----
-
-## Data models (TL;DR)
-
-**User** — username, email, hashed password, profile pic, location, role (user/admin), contact method + value
-
-**Item** — userId, type (lost/found), title, description, image (base64), location, dateLost/dateFound, status (active/resolved)
-
-**RecoveryRequest** — item ref, claimant ref, finder ref, status (pending/accepted/rejected), optional message
+And ideally later on..
+  Actual proper working user authentication where people can sign in through their google accounts will be available. I'm also planning on adding a location based notification feature(if a certain item is found on a locality then notification shall be sent to all the users from that certain locality). I need to work in making the UI more user efficient. And most importantly, IMPROVING THE SERVER HOSTING( currnetly its deployed on render so backend takes a bit time to load and home page seems to be crashed. will have to fix that later)
+  
+  PLEASEEEEE be a bit patient and wait for the feed to render 😭. I swear it works. Just takes quite a bit time to render from render ..😉
+  [ if there's any error while loading, just reload once ]
 
 ---
+<p>
+<p>
+<p>
+  
+## Current App Features
 
-## Getting running
+- User authentication
+- Lost item reporting
+- Found item reporting
+- Admin dashboard (only for me😋 )
+- Home news feed
+- Matching system
+- Notifications
+- Case resolution
+- Admin dashboard
+- Privacy maintainance until lost = found( contact info is shared only after case matches )
+- Dark/light/system theme
 
-### Need
-- Node 18+
-- MongoDB (local or Atlas)
+---
+<p>
+<p>
+<p>
+  
+## Tech Stack
 
-### Backend
+- React with Vite - Frontend
+- Node JS with Express - Backend 
+- Cloudinary - File storage (planning)
+- JWT - Authentication 
+- Vercel - Frontend Deployment 
+- Render - Backend Deployment 
+
+---
+<p>
+<p>
+<p>
+  
+## Some Glimpses
+<img src="client/public/ss1.jpg" alt="Home page SS" height="220" width="520"/>
+<img src="client/public/ss2.jpg" alt="Home page SS" height="220" width="520"/>
+<img src="client/public/ss3.jpg" alt="Home page SS" height="220" width="520"/>
+
+---
+<p>
+<p>
+<p>
+  
+## Getting Started
+
+
+### Prerequisites
+- None for now 
+
+### Installation
+
 ```bash
-cd server
+# To clone the repo
+git clone https://github.com/Aarjal/CourseForge.git
+cd courseforge
+
+# To install frontend dependencies
+cd ../client
 npm install
-# create .env in server/
-PORT=5001
-MONGODB_URI=mongodb://localhost:27017/lost_and_found
-JWT_SECRET=something_long_and_random
-npm run dev
 ```
 
-### Frontend
+### Running locally
+
 ```bash
+
+# To start frontend 
 cd client
-npm install
-npm run dev
-# opens at http://localhost:5173
+npm start
 ```
 
 ---
+<p>
+<p>
+<p>
+  
+Built as part of **[Thirdspace YSWS]** with great love and effort :)
 
-## Things I'd improve if I had more time
-
-- Image storage: base64 in Mongo is fine for demo, terrible for production. Would move to S3/Cloudinary.
-- Matching could use embeddings for semantic similarity, not just token overlap.
-- No email/SMS fallback for notifications yet — only in-app.
-- Admin dashboard is pretty bare bones.
-- Tests... there are basically none.
-
----
-
-## License
-
-MIT — do whatever.
-
----
-
-Built by [Aarjal](https://github.com/Aarjal) — feedback welcome, PRs even more welcome.

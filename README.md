@@ -66,6 +66,7 @@ And ideally later on..
 - React with Vite - Frontend
 - Node JS with Express - Backend 
 - Cloudinary - File storage (planning)
+- MongoDB - Database
 - JWT - Authentication 
 - Vercel - Frontend Deployment 
 - Render - Backend Deployment 
@@ -89,17 +90,24 @@ And ideally later on..
 
 
 ### Prerequisites
-- None for now 
+- Node JS 24+
+- npm
+- MongoDB 
+
 
 ### Installation
 
 ```bash
 # To clone the repo
-git clone https://github.com/Aarjal/CourseForge.git
-cd courseforge
+git clone https://github.com/Aarjal/The_Bug.git
+cd The_bug
 
 # To install frontend dependencies
 cd ../client
+npm install
+
+# To install backend dependencies
+cd ../server
 npm install
 ```
 
@@ -109,13 +117,22 @@ npm install
 
 # To start frontend 
 cd client
-npm start
+npm run dev
+
+# To start backend 
+cd server
+npm run dev
 ```
 
 ---
 <p>
 <p>
 <p>
+## License
+
+MIT — do whatever.
+---
+
   
-Built as part of **[Thirdspace YSWS]** with great love and effort :)
+Built by [Aarjal](https://github.com/Aarjal) — feedback welcome, PRs even more welcome.
 

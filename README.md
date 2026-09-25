@@ -20,7 +20,14 @@ You may use demo email and password :)
 <p>
 <p>
 <p>
-  
+
+## Demo workflow 
+
+https://github.com/user-attachments/assets/3be95013-5dbb-4975-822a-47cdc2a9dcc0
+<p>
+<p>
+<p>
+
 ## About Lost&Found
 
 Lost&Found is a full-stack web application where-

@@ -22,7 +22,7 @@ You may use demo email and password :)
 <p>
 
 ## Demo workflow 
-(you may change the playback speed)
+(you may change the playback speed)  
 https://github.com/user-attachments/assets/3be95013-5dbb-4975-822a-47cdc2a9dcc0
 <p>
 <p>

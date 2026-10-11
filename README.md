@@ -40,8 +40,8 @@ Lost&Found is a full-stack web application where-
 And ideally later on..
   Actual proper working user authentication where people can sign in through their google accounts will be available. I'm also planning on adding a location based notification feature(if a certain item is found on a locality then notification shall be sent to all the users from that certain locality). I need to work in making the UI more user efficient. And most importantly, IMPROVING THE SERVER HOSTING( currnetly its deployed on render so backend takes a bit time to load and home page seems to be crashed. will have to fix that later)
   
-  PLEASEEEEE be a bit patient and wait for the feed to render 😭.  
-  I swear it works. Just takes quite a bit time to render from render ..😉  
+  PLEASEEEEE be a bit patient and wait for the feed to render.  
+  Swear it works. Just takes quite a bit time to render from render .. 
   [ if there's any error while loading, just reload once ]
 
 ---
@@ -54,7 +54,7 @@ And ideally later on..
 - User authentication
 - Lost item reporting
 - Found item reporting
-- Admin dashboard (only for me😋 )
+- Admin dashboard
 - Home news feed
 - Matching system
 - Notifications
